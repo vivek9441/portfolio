@@ -1,0 +1,11 @@
+{
+  "name": "@bjornmelin/tailwind-config",
+  "version": "0.0.1",
+  "private": true,
+  "main": "tailwind.config.ts",
+  "types": "tailwind.config.ts",
+  "dependencies": {
+    "tailwindcss": "^3.4.15",
+    "tailwindcss-animate": "^1.0.7"
+  }
+} 
