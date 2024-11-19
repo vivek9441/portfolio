@@ -5,5 +5,7 @@ packages:
   - "packages/*"
   # Shared UI components
   - "packages/ui/*"
+  # Shared config
+  - "packages/config/*"
   # Exclude test directories
   - "!**/test/**"
