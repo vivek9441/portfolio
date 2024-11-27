@@ -98,8 +98,21 @@ pnpm-workspace.yaml
 .pnpm-debug.log
 *-debug.log
 *-error.log
+
 # tsup
 .temp/
+
+# Monorepo
+.turbo
+pnpm-lock.yaml
+
+# Environment
+.env*
+.env.local
+
+# Editor-specific
+.vscode/
+.idea/
 
 # repomix
 repomix-output.txt
