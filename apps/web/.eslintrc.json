@@ -1,0 +1,6 @@
+{
+  "root": true,
+  "extends": [
+    "@bjornmelin/eslint-config/next"
+  ]
+}
