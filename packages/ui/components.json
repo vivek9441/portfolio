@@ -13,9 +13,5 @@
     "aliases": {
         "components": "@/components",
         "utils": "@/lib/utils"
-    },
-    "options": {
-        "treeShaking": true,
-        "defaultVariants": true
     }
 }
