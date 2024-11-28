@@ -1,29 +1,24 @@
 {
   "name": "bjornmelin-platform-io",
+  "version": "1.0.0",
   "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ]
+  },
   "scripts": {
-    "dev": "pnpm --filter @bjornmelin/web dev",
-    "build": "pnpm --filter \"@bjornmelin/*\" build",
-    "lint": "pnpm --filter \"@bjornmelin/*\" lint",
-    "clean": "pnpm -r exec rimraf .next node_modules",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "test": "vitest",
-    "test:e2e": "playwright test",
-    "test:coverage": "vitest run --coverage"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "clean": "turbo clean",
+    "format": "prettier --write ."
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "eslint": "^9.15.0",
-    "eslint-config-next": "15.0.3",
     "prettier": "^3.3.3",
-    "rimraf": "^6.0.1",
-    "typescript": "^5.6.3",
-    "@playwright/test": "^1.49.0",
-    "@testing-library/react": "^16.0.1",
-    "@vitest/coverage-v8": "^2.1.5",
-    "vitest": "^2.1.5"
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.3"
   },
   "packageManager": "pnpm@9.13.2"
 }
