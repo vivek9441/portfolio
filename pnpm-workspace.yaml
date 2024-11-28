@@ -1,7 +1,11 @@
 packages:
-  # all packages in direct subdirs of packages/
-  - 'packages/*'
-  # all packages in subdirs of components/
-  - 'components/**'
-  # exclude packages that are inside test directories
-  - '!**/test/**'
+  # Main apps
+  - "apps/*"
+  # Shared packages
+  - "packages/*"
+  # Shared UI components
+  - "packages/ui/*"
+  # Shared config
+  - "packages/config/*"
+  # Exclude test directories
+  - "!**/test/**"
