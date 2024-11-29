@@ -3,13 +3,13 @@ import superjson from 'superjson';
 import { ZodError } from 'zod';
 import { type NextRequest } from 'next/server';
 
-export interface CreateContextOptions {
-  req: NextRequest;
+interface CreateContextOptions {
+  headers: Headers;
 }
 
-export const createTRPCContext = async (opts: CreateContextOptions) => {
+export const createTRPCContext = async (opts: { req: NextRequest }) => {
   return {
-    req: opts.req,
+    headers: opts.req.headers,
   };
 };
 
