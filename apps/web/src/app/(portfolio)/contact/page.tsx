@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { GitHubIcon, LinkedInIcon } from '@/components/shared/icons';
+import { SocialLinks } from '@/components/shared/SocialLinks';
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -21,20 +21,7 @@ export default function ContactPage() {
           <div className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">Connect with Me</h2>
-              <div className="flex gap-4">
-                <Button asChild>
-                  <Link href="https://linkedin.com/in/bjornmelin" target="_blank" rel="noopener noreferrer">
-                    <LinkedInIcon className="h-5 w-5 mr-2" />
-                    LinkedIn
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link href="https://github.com/bjornmelin" target="_blank" rel="noopener noreferrer">
-                    <GitHubIcon className="h-5 w-5 mr-2" />
-                    GitHub
-                  </Link>
-                </Button>
-              </div>
+              <SocialLinks />
             </div>
             <div>
               <h2 className="text-xl font-semibold mb-4">Email</h2>

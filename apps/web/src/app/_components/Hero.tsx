@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { GitHubIcon, LinkedInIcon } from '@/components/shared/icons';
+import { SocialLinks } from '@/components/shared/SocialLinks';
 
 export default function Hero() {
   return (
@@ -26,19 +26,8 @@ export default function Hero() {
               <Link href="/contact">Get in Touch</Link>
             </Button>
           </div>
-          <div className="mt-8 flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="https://github.com/bjornmelin" target="_blank" rel="noopener noreferrer">
-                <GitHubIcon className="h-5 w-5" />
-                <span className="sr-only">GitHub</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="https://linkedin.com/in/bjornmelin" target="_blank" rel="noopener noreferrer">
-                <LinkedInIcon className="h-5 w-5" />
-                <span className="sr-only">LinkedIn</span>
-              </Link>
-            </Button>
+          <div className="mt-8">
+            <SocialLinks variant="minimal" />
           </div>
         </div>
       </div>
