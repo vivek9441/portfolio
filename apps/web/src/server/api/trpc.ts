@@ -1,15 +1,15 @@
 import { initTRPC } from '@trpc/server';
 import superjson from 'superjson';
 import { ZodError } from 'zod';
-import { type CreateNextContextOptions } from '@trpc/server/adapters/next';
+import { type NextRequest } from 'next/server';
 
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
-  const req = opts.req;
-  const res = opts.res;
+export interface CreateContextOptions {
+  req: NextRequest;
+}
 
+export const createTRPCContext = async (opts: CreateContextOptions) => {
   return {
-    req,
-    res,
+    req: opts.req,
   };
 };
 
