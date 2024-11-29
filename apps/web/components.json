@@ -6,12 +6,12 @@
     "tailwind": {
         "config": "tailwind.config.ts",
         "css": "src/app/globals.css",
-        "baseColor": "brand",
+        "baseColor": "slate",
         "cssVariables": true,
-        "prefix": "ui"
+        "prefix": ""
     },
     "aliases": {
         "components": "@/components",
-        "utils": "@bjornmelin/ui/lib/utils"
+        "utils": "@/lib/utils"
     }
 }
