@@ -1,6 +1,7 @@
-import { createTRPCNext } from '@trpc/next';
-import { httpBatchLink, loggerLink } from '@trpc/client';
+import { createTRPCReact } from '@trpc/react-query';
+import { httpBatchLink } from '@trpc/client';
 import superjson from 'superjson';
+
 import { type AppRouter } from '@/server/api/root';
 
 const getBaseUrl = () => {
@@ -9,26 +10,13 @@ const getBaseUrl = () => {
   return `http://localhost:${process.env.PORT ?? 3000}`;
 };
 
-export const trpc = createTRPCNext<AppRouter>({
-  config() {
-    return {
+export const trpc = createTRPCReact<AppRouter>();
+
+export const api = trpc.createClient({
+  links: [
+    httpBatchLink({
+      url: `${getBaseUrl()}/api/trpc`,
       transformer: superjson,
-      links: [
-        loggerLink({
-          enabled: (opts) =>
-            process.env.NODE_ENV === 'development' ||
-            (opts.direction === 'down' && opts.result instanceof Error),
-        }),
-        httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
-          headers() {
-            return {
-              'x-trpc-source': 'client',
-            };
-          },
-        }),
-      ],
-    };
-  },
-  ssr: false,
+    }),
+  ],
 }); 
