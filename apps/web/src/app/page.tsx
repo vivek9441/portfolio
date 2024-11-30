@@ -1,17 +1,16 @@
-import { Metadata } from 'next';
-import Hero from './_components/Hero';
-import FeaturedProjects from './_components/FeaturedProjects';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import Link from "next/link";
+import { FeaturedProjects } from "@/components/sections/FeaturedProjects";
+import { Hero } from "@/components/sections/Hero";
+import { About } from "@/components/sections/About";
 
-export const metadata: Metadata = {
-  title: 'Bjorn Melin - AWS Solutions Architect & Full-Stack Developer',
-  description: 'AWS Solutions Architect and Full-Stack Developer specializing in cloud architecture and modern web development.',
-};
-
-export default function HomePage() {
+export default function Home() {
   return (
-    <>
+    <div className="flex-1">
       <Hero />
+      <About />
       <FeaturedProjects />
-    </>
+    </div>
   );
 }
