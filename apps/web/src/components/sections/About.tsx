@@ -1,73 +1,25 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-export default function About() {
+export function About() {
   return (
-    <section className="py-20">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className="relative h-[400px] rounded-lg overflow-hidden">
-            <Image
-              src="/about/profile.jpg"
-              alt="Bjorn Melin"
-              fill
-              className="object-cover"
-            />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold mb-6">About Me</h2>
-            <p className="text-gray-600 mb-6">
-              I'm an AWS Solutions Architect and Full-Stack Developer with a passion for building
-              scalable cloud solutions. With extensive experience in cloud architecture and
-              modern web development, I help businesses leverage cloud technology to solve
-              complex problems.
-            </p>
-            <div className="space-y-4 mb-8">
-              <div>
-                <h3 className="font-semibold mb-2">Technical Skills</h3>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    'AWS',
-                    'React',
-                    'Node.js',
-                    'TypeScript',
-                    'Python',
-                    'Infrastructure as Code',
-                    'CI/CD',
-                    'Serverless',
-                  ].map((skill) => (
-                    <span
-                      key={skill}
-                      className="px-3 py-1 bg-gray-100 text-sm rounded-full"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Certifications</h3>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    'AWS Solutions Architect Professional',
-                    'AWS DevOps Engineer Professional',
-                  ].map((cert) => (
-                    <span
-                      key={cert}
-                      className="px-3 py-1 bg-gray-100 text-sm rounded-full"
-                    >
-                      {cert}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <Button asChild>
-              <Link href="/about">Learn More</Link>
-            </Button>
-          </div>
-        </div>
+    <section
+      id="about"
+      className="container space-y-6 bg-slate-50 py-8 dark:bg-transparent md:py-12 lg:py-24"
+    >
+      <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
+        <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
+          About Me
+        </h2>
+        <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
+          I&apos;m an AWS Solutions Architect and Full-Stack Developer with a passion for
+          cloud architecture and modern web development. With expertise in AWS
+          services, React, TypeScript, and Node.js, I help businesses build
+          scalable and efficient cloud solutions.
+        </p>
+        <Button variant="outline" asChild>
+          <Link href="/about">Learn More</Link>
+        </Button>
       </div>
     </section>
   );

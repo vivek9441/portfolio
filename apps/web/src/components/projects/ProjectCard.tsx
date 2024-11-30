@@ -1,53 +1,74 @@
-import { Github, ArrowRight } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ProjectType } from '@/types/project';
+import Image from "next/image";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface ProjectCardProps {
-    project: ProjectType;
+  title: string;
+  description: string;
+  image: string;
+  technologies: string[];
+  links: {
+    github?: string;
+    live?: string;
+  };
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
-    return (
-        <Card className="flex flex-col">
-            <CardHeader>
-                <CardTitle>{project.title}</CardTitle>
-                <CardDescription>{project.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow">
-                <div className="mb-4">
-                    <div className="flex flex-wrap gap-2">
-                        {project.technologies.map((tech, index) => (
-                            <Badge key={index} variant="secondary">
-                                {tech}
-                            </Badge>
-                        ))}
-                    </div>
-                </div>
-                <div className="flex justify-between items-center">
-                    <Button variant="outline" asChild>
-                        <a
-                            href={project.links.demo}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2"
-                        >
-                            Live Demo <ArrowRight className="h-4 w-4" />
-                        </a>
-                    </Button>
-                    <Button variant="outline" asChild>
-                        <a
-                            href={project.links.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2"
-                        >
-                            Source <Github className="h-4 w-4" />
-                        </a>
-                    </Button>
-                </div>
-            </CardContent>
-        </Card>
-    );
+export function ProjectCard({
+  title,
+  description,
+  image,
+  technologies,
+  links,
+}: ProjectCardProps) {
+  return (
+    <Card className="flex flex-col overflow-hidden">
+      <div className="relative h-48">
+        <Image
+          src={image}
+          alt={title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+      </div>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-2">
+          {technologies.map((tech) => (
+            <Badge key={tech} variant="secondary">
+              {tech}
+            </Badge>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter className="mt-auto gap-2">
+        {links.github && (
+          <Button variant="outline" asChild>
+            <Link href={links.github} target="_blank" rel="noopener noreferrer">
+              GitHub
+            </Link>
+          </Button>
+        )}
+        {links.live && (
+          <Button asChild>
+            <Link href={links.live} target="_blank" rel="noopener noreferrer">
+              Live Demo
+            </Link>
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
+  );
 }
