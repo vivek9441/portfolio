@@ -20,21 +20,12 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@bjornmelin/*": [
-        "../../packages/*/src"
       ]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
   "exclude": [
     "node_modules",
     "dist",
-    "build",
-    ".turbo",
-    ".next"
+    ".turbo"
   ]
 }
