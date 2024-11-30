@@ -1,47 +1,26 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { GitHubIcon, LinkedInIcon } from '@/components/shared/icons';
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-export default function Hero() {
-  return (
-    <section className="relative min-h-[calc(100vh-4rem)] flex items-center">
-      <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
-        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_50%_200px,#C8DEFF,transparent)]" />
-      </div>
-      <div className="container mx-auto px-4">
-        <div className="max-w-3xl">
-          <h1 className="text-4xl font-bold sm:text-6xl">
-            Hi, I'm Bjorn Melin
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground">
-            AWS Solutions Architect & Full-Stack Developer specializing in cloud architecture
-            and modern web development. I help businesses build scalable, secure, and
-            efficient cloud solutions.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Button size="lg" asChild>
-              <Link href="/projects">View Projects</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/contact">Get in Touch</Link>
-            </Button>
-          </div>
-          <div className="mt-8 flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="https://github.com/bjornmelin" target="_blank" rel="noopener noreferrer">
-                <GitHubIcon className="h-5 w-5" />
-                <span className="sr-only">GitHub</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="https://linkedin.com/in/bjornmelin" target="_blank" rel="noopener noreferrer">
-                <LinkedInIcon className="h-5 w-5" />
-                <span className="sr-only">LinkedIn</span>
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-} 
+export function Hero() {
+    return (
+        <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
+            <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
+                <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl">
+                    Hi, I&apos;m Bjorn Melin
+                </h1>
+                <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8">
+                    AWS Solutions Architect and Full-Stack Developer passionate about building
+                    scalable cloud solutions and modern web applications.
+                </p>
+                <div className="space-x-4">
+                    <Button asChild>
+                        <Link href="/projects">View Projects</Link>
+                    </Button>
+                    <Button variant="outline" asChild>
+                        <Link href="/about">About Me</Link>
+                    </Button>
+                </div>
+            </div>
+        </section>
+    );
+}

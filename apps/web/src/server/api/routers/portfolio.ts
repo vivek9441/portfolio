@@ -18,14 +18,16 @@ const portfolioItemSchema = z.object({
   }),
 });
 
+const getPortfolioInputSchema = z.object({
+  limit: z.number().min(1).max(100).optional(),
+  cursor: z.string().optional(),
+  category: z.string().optional(),
+});
+
 export const portfolioRouter = createTRPCRouter({
   getAll: publicProcedure
-    .input(z.object({
-      limit: z.number().min(1).max(100).optional(),
-      cursor: z.string().optional(),
-      category: z.string().optional(),
-    }))
-    .query(async ({ input }) => {
+    .input(getPortfolioInputSchema)
+    .query(async ({ input }: { input: z.infer<typeof getPortfolioInputSchema> }) => {
       const items = [
         {
           id: '1',
@@ -54,8 +56,7 @@ export const portfolioRouter = createTRPCRouter({
 
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
-      // In a real app, fetch from database
+    .query(async ({ input }: { input: { id: string } }) => {
       return {
         id: input.id,
         title: 'Portfolio Website',

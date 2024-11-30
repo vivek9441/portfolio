@@ -3,6 +3,7 @@ import { type NextRequest } from 'next/server';
 import { env } from '@/env.mjs';
 import { appRouter } from '@/server/api/root';
 import { createTRPCContext } from '@/server/api/trpc';
+import { type TRPCError } from '@trpc/server';
 
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
@@ -12,7 +13,7 @@ const handler = (req: NextRequest) =>
     createContext: () => createTRPCContext({ req }),
     onError:
       env.NODE_ENV === 'development'
-        ? ({ path, error }) => {
+        ? ({ path, error }: { path: string | undefined; error: TRPCError }) => {
             console.error(
               `❌ tRPC failed on ${path ?? '<no-path>'}: ${error.message}`
             );
