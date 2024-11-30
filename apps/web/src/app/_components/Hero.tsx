@@ -1,8 +1,8 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { SocialLinks } from '@/components/shared/SocialLinks';
+import { Button } from "@/components/ui/button";
+import { SocialLinks } from "@/components/shared/SocialLinks";
+import Link from "next/link";
 
-export default function Hero() {
+export function Hero() {
   return (
     <section className="relative min-h-[calc(100vh-4rem)] flex items-center">
       <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
@@ -11,12 +11,12 @@ export default function Hero() {
       <div className="container mx-auto px-4">
         <div className="max-w-3xl">
           <h1 className="text-4xl font-bold sm:text-6xl">
-            Hi, I'm Bjorn Melin
+            Hi, I&apos;m Bjorn Melin
           </h1>
           <p className="mt-6 text-xl text-muted-foreground">
-            AWS Solutions Architect & Full-Stack Developer specializing in cloud architecture
-            and modern web development. I help businesses build scalable, secure, and
-            efficient cloud solutions.
+            AWS Solutions Architect & Full-Stack Developer specializing in cloud
+            architecture and modern web development. I help businesses build
+            scalable, secure, and efficient cloud solutions.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Button size="lg" asChild>
@@ -27,7 +27,7 @@ export default function Hero() {
             </Button>
           </div>
           <div className="mt-8">
-            <SocialLinks variant="minimal" />
+            <SocialLinks />
           </div>
         </div>
       </div>
