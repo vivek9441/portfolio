@@ -1,5 +1,5 @@
-export * from './components/button';
+export * from './components/layout';
+export * from './components/shared';
 export * from './lib/utils';
-export * from './styles/globals.css';
 
-export type { ButtonProps } from './components/button';
+export type { LayoutProps } from './components/layout';
