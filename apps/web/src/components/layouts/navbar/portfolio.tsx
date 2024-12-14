@@ -1,4 +1,4 @@
-import { SocialLinks } from "@/components/shared/SocialLinks";
+import { SocialLinks } from "@/components/shared/social-links";
 import { BaseNavbar } from "./base-navbar";
 
 const portfolioLinks = [

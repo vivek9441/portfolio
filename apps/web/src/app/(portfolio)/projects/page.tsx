@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { ProjectGrid } from "@/components/projects/ProjectGrid";
+import { ProjectGrid } from "@/components/projects/project-grid";
 
 export const metadata: Metadata = {
   title: "Projects - Bjorn Melin",

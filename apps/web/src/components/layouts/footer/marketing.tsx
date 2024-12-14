@@ -1,4 +1,4 @@
-import { SocialLinks } from "@/components/shared/SocialLinks";
+import { SocialLinks } from "@/components/shared/social-links";
 import { BaseFooter } from "./base-footer";
 
 export function MarketingFooter() {

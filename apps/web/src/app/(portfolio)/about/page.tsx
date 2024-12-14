@@ -1,6 +1,6 @@
 // app/about/page.tsx
 import { Metadata } from 'next';
-import AboutHero from './components/AboutHero';
+import { AboutHero } from '@/components/features/portfolio/about/about-hero';
 
 export const metadata: Metadata = {
   title: 'About',

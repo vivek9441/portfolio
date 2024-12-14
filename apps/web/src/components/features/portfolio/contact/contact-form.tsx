@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +19,7 @@ export function ContactForm() {
         mode: "onChange",
     });
 
-    const { mutate: sendContactForm, isLoading } = trpc.contact.submit.useMutation({
+    const { mutate: sendContactForm, isPending } = trpc.contact.submit.useMutation({
         onSuccess: () => {
             toast({
                 title: "Message sent!",

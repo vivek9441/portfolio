@@ -1,7 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import Link from "next/link";
-import { FeaturedProjects } from "@/components/sections/FeaturedProjects";
+import { FeaturedProjects } from "@/components/sections/featured-projects";
 import { Hero } from "@/components/sections/hero";
 import { About } from "@/components/sections/about";
 
