@@ -137,3 +137,7 @@ repomix-output.txt
 # Editor-specific
 .vscode/
 .idea/
+
+# Backup files
+*.bak
+*.backup
