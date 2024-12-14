@@ -1,10 +1,11 @@
 {
   "name": "@bjornmelin/tsconfig",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Shared TypeScript configuration for Bjorn Melin's monorepo",
-  "main": "base.json",
+  "main": "./base.json",
   "files": [
-    "base.json"
+    "./base.json",
+    "./nextjs.json"
   ],
   "keywords": [
     "typescript",
