@@ -1,6 +1,6 @@
 {
   "name": "@bjornmelin/tailwind-config",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Shared Tailwind CSS configuration for Bjorn Melin's monorepo",
   "main": "tailwind.config.ts",
   "files": [
@@ -15,7 +15,7 @@
   "author": "Bjorn Melin",
   "license": "MIT",
   "peerDependencies": {
-    "tailwindcss": "^3.3.3",
+    "tailwindcss": "^3.4.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49"
   },
