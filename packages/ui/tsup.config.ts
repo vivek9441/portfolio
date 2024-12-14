@@ -14,11 +14,14 @@ export default defineConfig({
     external: ["react", "react-dom"],
     treeshake: true,
     minify: true,
-    async onSuccess() {
+    outDir: "dist",
+    onSuccess: async () => {
         // Generate CSS file
         const css = await readFile("src/styles/globals.css", "utf8");
         const result = await postcss([
-            tailwindcss(),
+            tailwindcss({
+                config: "./tailwind.config.ts",
+            }),
             autoprefixer,
         ]).process(css, {
             from: undefined,

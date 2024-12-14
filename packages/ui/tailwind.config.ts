@@ -1,17 +1,13 @@
 import { Config } from 'tailwindcss';
+import sharedConfig from "@bjornmelin/tailwind-config";
 
 const config: Config = {
+    // Extend the shared config
+    ...sharedConfig,
+    // Override content paths for UI package
     content: [
         './src/**/*.{js,ts,jsx,tsx}',
     ],
-    theme: {
-        extend: {
-            colors: {
-                accent: '#6366F1'
-            }
-        }
-    },
-    plugins: []
 };
 
 export default config;

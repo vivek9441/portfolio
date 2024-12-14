@@ -1,16 +1,25 @@
 {
-  "extends": "../../packages/tsconfig/base.json",
+  "extends": "../../packages/config/tsconfig/base.json",
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "baseUrl": ".",
+    "outDir": "dist",
+    "declaration": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
   "include": [
-    "src/**/*.ts", 
+    "src/**/*.ts",
     "src/**/*.tsx",
-    "components.json"
+    "src/**/*.json"
   ],
-  "exclude": ["node_modules"]
-} 
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
