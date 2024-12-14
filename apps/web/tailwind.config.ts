@@ -6,7 +6,8 @@ const config: Config = {
 	...sharedConfig,
 	// Override content paths for web app
 	content: [
-		'./src/**/*.{js,ts,jsx,tsx}',
+		'./src/**/*.{js,ts,jsx,tsx,mdx}',
+		'../../packages/ui/src/**/*.{js,ts,jsx,tsx}'
 	],
 };
 

@@ -1,12 +1,10 @@
 import { Config } from 'tailwindcss';
-import sharedConfig from "@bjornmelin/tailwind-config";
+import sharedConfig from "../../packages/config/tailwind-config/tailwind.config";
 
 const config: Config = {
-    // Extend the shared config
     ...sharedConfig,
-    // Override content paths for UI package
     content: [
-        './src/**/*.{js,ts,jsx,tsx}',
+        './src/**/*.{js,ts,jsx,tsx}'
     ],
 };
 

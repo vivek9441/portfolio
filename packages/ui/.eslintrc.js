@@ -1,6 +1,6 @@
 module.exports = {
     root: true,
-    extends: ["@bjornmelin/eslint-config"],
+    extends: ["../../packages/config/eslint-config"],
     parserOptions: {
         tsconfigRootDir: __dirname,
         project: ["./tsconfig.json"],

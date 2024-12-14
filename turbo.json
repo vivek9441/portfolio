@@ -17,7 +17,8 @@
         "lint": {
             "dependsOn": [
                 "^lint"
-            ]
+            ],
+            "outputs": []
         },
         "dev": {
             "cache": false,
@@ -29,13 +30,8 @@
         "typecheck": {
             "dependsOn": [
                 "^typecheck"
-            ]
-        },
-        "start": {
-            "dependsOn": [
-                "build"
             ],
-            "cache": false
+            "outputs": []
         }
     }
 }
