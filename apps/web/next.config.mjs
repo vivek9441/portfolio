@@ -3,16 +3,14 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@bjornmelin/ui"],
   experimental: {
-    appDir: true,
     typedRoutes: true,
     optimizeCss: true,
-    serverActions: true,
   },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '*.bjornmelin.io' },
     ],
-    formats: ['image/avif', 'image/webp'], // Optimized formats
+    formats: ['image/avif', 'image/webp'],
   },
   typescript: {
     ignoreBuildErrors: false,
