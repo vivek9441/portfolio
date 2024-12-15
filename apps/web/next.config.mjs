@@ -4,7 +4,12 @@ const nextConfig = {
   transpilePackages: ["@bjornmelin/ui"],
   experimental: {
     typedRoutes: true,
-    optimizeCss: true,
+    optimizeCss: {
+      critters: {
+        preload: 'media',
+        pruneSource: true,
+      },
+    },
   },
   images: {
     remotePatterns: [
