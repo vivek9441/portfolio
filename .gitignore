@@ -1,10 +1,10 @@
 # Dependencies
 node_modules
+*node_modules/
 .pnpm-store/
 
 # dependencies
 /node_modules
-*node_modules/
 /.pnp
 .pnp.*
 .yarn/*
