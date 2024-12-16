@@ -1,63 +1,59 @@
-# Dependencies
-node_modules
-.pnpm-store/
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
 /node_modules
 *node_modules/
+
 /.pnp
-.pnp.*
+.pnp.js
+.yarn/install-state.gz
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
 
-# Next.js
-.next/
-out/
-build/
-dist/
+# testing
+/coverage
 
-# Testing
-coverage/
-playwright-report/
-test-results/
+# next.js
+/.next/
+/out/
 
-# Production
-build
-dist
+# production
+*build/
+*dist/
 
-# Debug
+# misc
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# Local env files
+# local env files
+.env*.local
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 
-# Turbo
-.turbo
+# vercel
+.vercel
 
-# TypeScript
+# typescript
 *.tsbuildinfo
 next-env.d.ts
 
+# VSCode file excluding the settings.json file
+.vscode/
+!settings.json
+
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
 .idea
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+
+# cdk
+cdk.out
 
 # Optional npm cache directory
 .npm
@@ -67,73 +63,3 @@ next-env.d.ts
 
 # Optional stylelint cache
 .stylelintcache
-
-# dotenv environment variable files
-.env.development
-.env.test
-.env.production
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# yarn v2
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.yarn/install-state.gz
-.pnp.*
-
-# Serverless directories
-.serverless/
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# Temporary folders
-tmp/
-temp/
-
-# pnpm
-pnpm-lock.yaml
-pnpm-workspace.yaml
-.pnpm-store/
-.pnpm-debug.log
-
-# repomix file used for generating llm input instructions
-repomix-output.txt
-
-# turbo repo specific
-.turbo
-**/dist
-**/.next
-**/.vercel
-**/.output
-**/.build
-**/.cache
-**/.env
-**/build
-**/out
-
-# logs
-*-debug.log
-*-error.log
-
-# tsup
-.temp/
-
-# Environment
-.env*
-.env.local
-
-# Editor-specific
-.vscode/
-.idea/
