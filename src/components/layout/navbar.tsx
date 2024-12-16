@@ -5,6 +5,10 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
+const NavSeparator = () => (
+  <span className="text-muted-foreground/30">|</span>
+);
+
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
@@ -15,35 +19,46 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="text-xl font-bold">
-            Portfolio
+            Bjorn Melin | Portfolio
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-4">
+            <Link
+              href="/"
+              className="text-foreground/60 hover:text-foreground"
+            >
+              Home
+            </Link>
+            <NavSeparator />
             <Link
               href="/about"
               className="text-foreground/60 hover:text-foreground"
             >
               About
             </Link>
+            <NavSeparator />
             <Link
               href="/projects"
               className="text-foreground/60 hover:text-foreground"
             >
               Projects
             </Link>
+            <NavSeparator />
             <Link
               href="/blog"
               className="text-foreground/60 hover:text-foreground"
             >
               Blog
             </Link>
+            <NavSeparator />
             <Link
               href="/contact"
               className="text-foreground/60 hover:text-foreground"
             >
               Contact
             </Link>
+            <NavSeparator />
             <ThemeToggle />
           </div>
 
@@ -61,6 +76,13 @@ export function Navbar() {
         {isMenuOpen && (
           <div className="md:hidden py-4">
             <div className="flex flex-col space-y-4">
+              <Link
+                href="/"
+                className="text-foreground/60 hover:text-foreground"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
               <Link
                 href="/about"
                 className="text-foreground/60 hover:text-foreground"
