@@ -1,61 +1,13 @@
 "use client";
 
-import React, { ElementType } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Brain,
-  Cloud,
-  Code,
-  GraduationCap,
-  Sparkles,
-  Terminal,
-  ArrowRight,
-} from "lucide-react";
+import React from "react";
+import Link from "next/link";
+import { GraduationCap, Sparkles, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-
-interface SkillCategory {
-  name: string;
-  Icon: ElementType;
-  skills: string[];
-  color: string;
-}
-
-const skillCategories: SkillCategory[] = [
-  {
-    name: "AI & Machine Learning",
-    Icon: Brain,
-    color: "bg-purple-500/10 text-purple-500",
-    skills: ["Deep Learning", "NLP", "GenAI", "LLMs", "RAG"],
-  },
-  {
-    name: "Cloud Architecture",
-    Icon: Cloud,
-    color: "bg-blue-500/10 text-blue-500",
-    skills: ["AWS", "Serverless", "IaC", "CDK", "Microservices"],
-  },
-  {
-    name: "Development",
-    Icon: Code,
-    color: "bg-green-500/10 text-green-500",
-    skills: ["Full-Stack", "API Design", "CI/CD", "DevOps", "TDD"],
-  },
-  {
-    name: "Technologies",
-    Icon: Terminal,
-    color: "bg-orange-500/10 text-orange-500",
-    skills: ["Python", "TypeScript", "Node.js", "React", "Next.js"],
-  },
-];
+import { skillCategories } from "@/data/skills";
 
 export function About() {
-  const router = useRouter();
-
-  const handleLearnMore = () => {
-    router.push("/about");
-  };
-
   return (
     <section className="py-24 relative overflow-hidden bg-gradient-to-br from-background via-primary/5 to-background">
       {/* Background Effects */}
@@ -68,7 +20,7 @@ export function About() {
         {/* Header */}
         <div className="text-center mb-20 relative">
           <Badge variant="outline" className="mb-4">
-            <Sparkles className="w-3 h-3 mr-2" />
+            <Sparkles className="w-3 h-3 mr-2 text-primary" />
             About Me
           </Badge>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
@@ -84,7 +36,7 @@ export function About() {
         {/* Main Content */}
         <div className="grid lg:grid-cols-5 gap-8 items-start mb-16">
           {/* Professional Summary */}
-          <Card className="lg:col-span-2 p-6 backdrop-blur-xl bg-card/50 border-primary/10">
+          <Card className="lg:col-span-2 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3 mb-6">
               <div className={`p-2 rounded-lg bg-primary/10`}>
                 <GraduationCap className="w-6 h-6 text-primary" />
@@ -105,7 +57,7 @@ export function About() {
             {skillCategories.map((category) => (
               <Card
                 key={category.name}
-                className="p-6 backdrop-blur-xl bg-card/50 border-primary/10"
+                className="p-6 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center gap-3 mb-6">
                   <div className={`p-2 rounded-lg ${category.color}`}>
@@ -117,7 +69,7 @@ export function About() {
                   {category.skills.map((skill) => (
                     <Badge
                       key={skill}
-                      variant="secondary"
+                      variant="outline"
                       className={`${category.color} hover:scale-105 transition-transform`}
                     >
                       {skill}
@@ -130,11 +82,14 @@ export function About() {
         </div>
 
         {/* CTA Button */}
-        <div className="text-center">
-          <Button onClick={handleLearnMore} size="lg" className="group">
+        <div className="text-center relative z-10">
+          <Link
+            href="/about"
+            className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors group pointer-events-auto"
+          >
             Learn More About Me
             <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-          </Button>
+          </Link>
         </div>
       </div>
     </section>
