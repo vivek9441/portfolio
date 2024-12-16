@@ -16,7 +16,7 @@
 # testing
 /coverage
 
-# next.js
+# next.js build output
 /.next/
 /out/
 
@@ -63,3 +63,6 @@ cdk.out
 
 # Optional stylelint cache
 .stylelintcache
+
+# RepoMix
+repomix-output.txt
