@@ -2,25 +2,28 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { FrontendStack } from '../lib/stacks/frontend-stack';
+import { CONFIG } from '../lib/constants';
 
 const app = new cdk.App();
 
-// Development environment
-new FrontendStack(app, 'BjornmelinFrontendDev', {
-  domainName: 'dev.bjornmelin.io',
-  environment: 'dev',
+// Development stack
+new FrontendStack(app, 'DevFrontendStack', {
+  domainName: CONFIG.dev.domainName,
+  environment: CONFIG.dev.environment,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
+  tags: CONFIG.tags,
 });
 
-// Production environment
-new FrontendStack(app, 'BjornmelinFrontendProd', {
-  domainName: 'bjornmelin.io',
-  environment: 'prod',
+// Production stack
+new FrontendStack(app, 'ProdFrontendStack', {
+  domainName: CONFIG.prod.domainName,
+  environment: CONFIG.prod.environment,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
   },
+  tags: CONFIG.tags,
 }); 

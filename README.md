@@ -1,16 +1,20 @@
 # 🏗️ bjornmelin-platform-io
 
-Cloud-native portfolio platform powering bjornmelin.io. Demonstrates AWS solutions architecture through microservices, serverless APIs, and infrastructure as code. Built with React 19 RC, Next.js 15, AWS CDK, and modern DevOps practices.
+Cloud-native portfolio platform powering bjornmelin.io. Demonstrates AWS solutions architecture through serverless APIs and infrastructure as code. Built with React 18 RC, Next.js 14, AWS CDK, and modern DevOps practices.
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](CONTRIBUTING.md)
 [![AWS SAA](https://img.shields.io/badge/AWS-Solutions%20Architect%20Associate-FF9900?logo=amazon-aws)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-solutions-architect-associate)
 [![AWS DVA](https://img.shields.io/badge/AWS-Developer%20Associate-FF9900?logo=amazon-aws)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-developer-associate)
+[![AWS SysOps](https://img.shields.io/badge/AWS-SysOps%20Administrator%20Associate-FF9900?logo=amazon-aws)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-sysops-administrator-associate)
+[![AWS ML](https://img.shields.io/badge/AWS-Machine%20Learning%20Engineer%20Associate-FF9900?logo=amazon-aws)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-machine-learning-engineer-associate)
+[![AWS AIF](https://img.shields.io/badge/AWS-AI%20Practitioner-FF9900?logo=amazon-aws)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-ai-practitioner)
 [![AWS CCP](https://img.shields.io/badge/AWS-Cloud%20Practitioner-FF9900?logo=amazon-aws)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-cloud-practitioner)
 [![React](https://img.shields.io/badge/React-19_RC-blue?logo=react)](https://react.dev)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![GitHub](https://img.shields.io/badge/GitHub-BjornMelin-181717?logo=github)](https://github.com/BjornMelin)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Bjorn%20Melin-0077B5?logo=linkedin)](https://www.linkedin.com/in/bjorn-melin/)
+[![Coursera](https://img.shields.io/badge/Coursera-2A73CC?logo=coursera&logoColor=white)](https://www.coursera.org/learner/bjorn-melin)
+[![Medium](https://img.shields.io/badge/Medium-000000?logo=medium&logoColor=white)](https://medium.com/@bjornmelin)
 
 ## 🌟 Features
 
@@ -27,14 +31,14 @@ Cloud-native portfolio platform powering bjornmelin.io. Demonstrates AWS solutio
 
 ### Modern Tech Features
 
-- ⚡ **React 19 RC Integration**
+- ⚡ **React 18 RC Integration**
 
   - Document Metadata API
   - Asset Loading API
   - Progressive Loading
   - Optimization Compiler
 
-- 🚀 **Next.js 15 App Router**
+- 🚀 **Next.js 14 App Router**
 
   - Server Components
   - Partial Prerendering
@@ -155,36 +159,36 @@ sequenceDiagram
 
 ```bash
 bjornmelin-platform-io/
-├── app/                   # Next.js 15 App Router
-│   ├── (auth)/            # Auth routes
-│   ├── (portfolio)/       # Portfolio routes
-│   └── api/               # Edge API routes
-├── infrastructure/        # CDK infrastructure code
-│   ├── lib/
-│   │   ├── constructs/    # Reusable CDK constructs
-│   │   └── stacks/        # AWS CDK stacks
-├── services/              # Microservices
-│   ├── auth/              # Authentication service
-│   └── api/               # Main API service
+├── .github/                # GitHub Actions workflows
+│   └── workflows/
+├── infrastructure/         # CDK infrastructure code
+│   ├── bin/               # CDK app entry point
+│   └── lib/               # CDK stacks and constructs
+├── src/                   # Application source code
+│   ├── app/               # Next.js 15 App Router
+│   │   ├── fonts/         # Local font files
+│   │   └── globals.css    # Global styles
+│   ├── components/        # React components
+│   └── lib/               # Shared utilities
+├── public/                # Static assets
 └── docs/                  # Documentation
 ```
 
 ### Core Components
 
-- **Frontend**: Next.js 15 static site hosted on S3/CloudFront
-- **Authentication**: Custom Cognito service with social providers
-- **API Gateway**: Centralized API management
-- **Services**: Event-driven microservices architecture
-- **Database**: DynamoDB with global tables
+- **Frontend**: Next.js 15 application with App Router
+- **Infrastructure**: AWS CDK for cloud resource management
+- **CI/CD**: GitHub Actions for automated deployments
 - **CDN**: CloudFront with global edge locations
 - **Monitoring**: CloudWatch with custom dashboards
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 ```bash
 Node.js >= 20.0.0
-pnpm >= 8.0.0
+yarn >= 4.0.0
 AWS CLI configured
 ```
 
@@ -196,7 +200,7 @@ git clone https://github.com/bjornmelin/bjornmelin-platform-io.git
 cd bjornmelin-platform-io
 
 # Install dependencies
-pnpm install
+yarn install
 
 # Configure AWS credentials
 aws configure
@@ -208,19 +212,16 @@ cp .env.example .env.local
 ### Infrastructure Deployment
 
 ```bash
-# Deploy base infrastructure
+# Deploy infrastructure
 cd infrastructure
-pnpm run cdk deploy
+yarn cdk deploy
 ```
 
 ### Local Development
 
 ```bash
-# Start frontend
-cd frontend && pnpm dev
-
-# Start API
-cd services/api && pnpm dev
+# Start development server
+yarn dev
 ```
 
 ## 🛠️ Tech Stack
@@ -237,57 +238,51 @@ Frontend:
     - shadcn/ui
     - Framer Motion
 
-  Data:
-    - TanStack Query
-    - tRPC Client
-    - Zod
-
-Backend:
+Infrastructure:
   Core:
-    - Edge Runtime
-    - Node.js 20
-    - tRPC
-
-  Infrastructure:
     - AWS CDK
-    - DynamoDB
     - CloudFront
     - Lambda Edge
-    - Secrets Manager
+    - S3
 
 Development:
   Tools:
-    - pnpm
-    - Turborepo
-    - Vitest
-    - Playwright
+    - yarn
+    - ESLint
+    - Prettier
+    - TypeScript
 ```
 
 ## 🏗️ AWS Services Integration
 
 ### Core Services
+
 - **CloudFront**: Global content delivery with edge computing
 - **Route53**: DNS management and routing policies
 - **WAF**: Web application firewall and security rules
 - **ACM**: Certificate management and SSL/TLS
 
 ### Compute Services
+
 - **Lambda**: Serverless functions with edge capabilities
 - **ECS**: Container orchestration with Fargate
 - **EC2**: Infrastructure hosts (minimal usage)
 
 ### Storage Services
+
 - **S3**: Static assets and website hosting
 - **DynamoDB**: NoSQL database with global tables
 - **EFS**: Container storage when needed
 
 ### Security Services
+
 - **Cognito**: User authentication and authorization
 - **Secrets Manager**: Secure secrets storage and rotation
 - **KMS**: Encryption key management
 - **IAM**: Fine-grained access control
 
 ### Developer Tools
+
 - **CodeBuild**: CI/CD build processes
 - **CodePipeline**: Deployment automation
 - **CloudWatch**: Monitoring and alerting
@@ -306,12 +301,17 @@ Development:
 
 [![AWS Certified Solutions Architect](https://images.credly.com/size/110x110/images/0e284c3f-5164-4b21-8660-0d84737941bc/image.png)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-solutions-architect-associate)
 [![AWS Certified Developer](https://images.credly.com/size/110x110/images/b9feab85-1a43-4f6c-99a5-631b88d5461b/image.png)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-developer-associate)
+[![AWS Certified SysOps Administrator](https://images.credly.com/size/110x110/images/f0d3fbb9-bfa7-4017-9989-7bde8eaf42b1/image.png)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-sysops-administrator-associate)
+[![AWS Certified Machine Learning Engineer](https://images.credly.com/size/110x110/images/1a634b4e-3d6b-4a74-b118-c0dcb429e8d2/image.png)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-machine-learning-engineer-associate)
+[![AWS Certified AI Practitioner](https://images.credly.com/size/110x110/images/4d4693bb-530e-4bca-9327-de07f3aa2348/image.png)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-ai-practitioner)
 [![AWS Certified Cloud Practitioner](https://images.credly.com/size/110x110/images/00634f82-b07f-4bbd-a6bb-53de397fc3a6/image.png)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-cloud-practitioner)
 
-AWS-certified Solutions Architect and Developer with expertise in cloud architecture and modern development practices. Connect with me on:
+AWS-certified Solutions Architect, Developer, SysOps Administrator, and Machine Learning Engineer with expertise in cloud architecture and modern development practices. Connect with me on:
 
 - [GitHub](https://github.com/BjornMelin)
 - [LinkedIn](https://www.linkedin.com/in/bjorn-melin/)
+- [Coursera](https://www.coursera.org/learner/bjorn-melin)
+- [Medium](https://medium.com/@bjornmelin)
 
 ## 📜 License
 
@@ -331,6 +331,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-Built with React 19 RC + Next.js 15 by [Bjorn Melin](https://bjornmelin.io)
+Built with React 18 RC + Next.js 14 by [Bjorn Melin](https://bjornmelin.io)
 
 </div>
