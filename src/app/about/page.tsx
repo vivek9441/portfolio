@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { About } from "@/components/sections/about";
+import { AboutDetail } from "@/components/sections/about-detail";
 
 export const metadata: Metadata = {
   title: "About - Bjorn Melin | Senior Data Scientist & Cloud Architect",
@@ -10,8 +10,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <main className="flex min-h-screen flex-col">
-      <About />
-      {/* You can add more sections here specific to the About page */}
+      <AboutDetail />
     </main>
   );
 } 

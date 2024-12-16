@@ -1,61 +1,19 @@
 "use client";
 
-import React, { ElementType } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
+import Link from "next/link";
 import {
-  Brain,
-  Cloud,
-  Code,
   GraduationCap,
   Sparkles,
-  Terminal,
   ArrowRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-interface SkillCategory {
-  name: string;
-  Icon: ElementType;
-  skills: string[];
-  color: string;
-}
-
-const skillCategories: SkillCategory[] = [
-  {
-    name: "AI & Machine Learning",
-    Icon: Brain,
-    color: "bg-purple-500/10 text-purple-500",
-    skills: ["Deep Learning", "NLP", "GenAI", "LLMs", "RAG"],
-  },
-  {
-    name: "Cloud Architecture",
-    Icon: Cloud,
-    color: "bg-blue-500/10 text-blue-500",
-    skills: ["AWS", "Serverless", "IaC", "CDK", "Microservices"],
-  },
-  {
-    name: "Development",
-    Icon: Code,
-    color: "bg-green-500/10 text-green-500",
-    skills: ["Full-Stack", "API Design", "CI/CD", "DevOps", "TDD"],
-  },
-  {
-    name: "Technologies",
-    Icon: Terminal,
-    color: "bg-orange-500/10 text-orange-500",
-    skills: ["Python", "TypeScript", "Node.js", "React", "Next.js"],
-  },
-];
+import { motion } from "framer-motion";
+import { skillCategories } from "@/data/skills";
 
 export function About() {
-  const router = useRouter();
-
-  const handleLearnMore = () => {
-    router.push("/about");
-  };
-
   return (
     <section className="py-24 relative overflow-hidden bg-gradient-to-br from-background via-primary/5 to-background">
       {/* Background Effects */}
@@ -131,10 +89,13 @@ export function About() {
 
         {/* CTA Button */}
         <div className="text-center">
-          <Button onClick={handleLearnMore} size="lg" className="group">
+          <Link 
+            href="/about"
+            className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors group"
+          >
             Learn More About Me
             <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-          </Button>
+          </Link>
         </div>
       </div>
     </section>
