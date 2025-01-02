@@ -5,6 +5,7 @@ import { DnsStack } from "../lib/stacks/dns-stack";
 import { StorageStack } from "../lib/stacks/storage-stack";
 import { DeploymentStack } from "../lib/stacks/deployment-stack";
 import { MonitoringStack } from "../lib/stacks/monitoring-stack";
+import { EmailStack } from "../lib/stacks/email-stack";
 import { CONFIG, getStackName } from "../lib/constants";
 
 const app = new cdk.App();
@@ -72,3 +73,15 @@ const monitoringStack = new MonitoringStack(
 
 // Ensure monitoring stack depends on storage stack
 monitoringStack.addDependency(storageStack);
+
+// Email Stack
+const emailStack = new EmailStack(app, getStackName("email", "prod"), {
+  env,
+  domainName: CONFIG.prod.domainName,
+  environment: CONFIG.prod.environment,
+  hostedZone: dnsStack.hostedZone,
+  tags: CONFIG.tags,
+});
+
+// Ensure email stack depends on DNS stack
+emailStack.addDependency(dnsStack);
