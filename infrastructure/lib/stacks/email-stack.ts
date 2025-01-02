@@ -4,12 +4,14 @@ import * as ses from "aws-cdk-lib/aws-ses";
 import * as lambda from "aws-cdk-lib/aws-lambda-nodejs";
 import * as lambdaCore from "aws-cdk-lib/aws-lambda";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Construct } from "constructs";
 import { EmailStackProps } from "../types/stack-props";
 import * as path from "path";
 
 export class EmailStack extends cdk.Stack {
   public readonly emailFunction: lambda.NodejsFunction;
+  public readonly api: apigateway.RestApi;
 
   constructor(scope: Construct, id: string, props: EmailStackProps) {
     super(scope, id, props);
@@ -61,19 +63,37 @@ export class EmailStack extends cdk.Stack {
           SENDER_EMAIL: `no-reply@${props.domainName}`,
           RECIPIENT_EMAIL: "bjornmelin16@gmail.com",
           REGION: this.region,
+          ALLOWED_ORIGIN: `https://${props.domainName}`,
         },
         bundling: {
           minify: true,
           sourceMap: true,
-          externalModules: [
-            "@aws-sdk/client-ses", // Available in the Lambda runtime
-          ],
+          externalModules: ["@aws-sdk/client-ses"],
         },
         timeout: cdk.Duration.seconds(10),
         memorySize: 128,
         architecture: lambdaCore.Architecture.ARM_64,
-        tracing: lambdaCore.Tracing.ACTIVE, // Enable X-Ray tracing
+        tracing: lambdaCore.Tracing.ACTIVE,
       }
+    );
+
+    // Create API Gateway
+    this.api = new apigateway.RestApi(this, "ContactApi", {
+      restApiName: "Contact Form API",
+      description: "API for contact form submissions",
+      defaultCorsPreflightOptions: {
+        allowOrigins: [`https://${props.domainName}`],
+        allowMethods: ["POST", "OPTIONS"],
+        allowHeaders: ["Content-Type"],
+        maxAge: cdk.Duration.hours(1),
+      },
+    });
+
+    // Add API Gateway resource and method
+    const contact = this.api.root.addResource("contact");
+    contact.addMethod(
+      "POST",
+      new apigateway.LambdaIntegration(this.emailFunction)
     );
 
     // Create custom policy for SES permissions
@@ -93,6 +113,12 @@ export class EmailStack extends cdk.Stack {
       value: this.emailFunction.functionArn,
       description: "Contact Form Lambda Function ARN",
       exportName: `${props.environment}-email-function-arn`,
+    });
+
+    new cdk.CfnOutput(this, "ApiEndpoint", {
+      value: this.api.url,
+      description: "API Gateway Endpoint",
+      exportName: `${props.environment}-api-endpoint`,
     });
 
     new cdk.CfnOutput(this, "EmailDomainIdentityName", {
