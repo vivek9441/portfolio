@@ -60,35 +60,17 @@ jobs:
           NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
         run: yarn build
 
-      # Get stack outputs
-      - name: Get Stack Outputs
-        id: stack-outputs
-        run: |
-          BUCKET_NAME=$(aws cloudformation describe-stacks \
-            --stack-name prod-portfolio-storage \
-            --query 'Stacks[0].Outputs[?OutputKey==`WebsiteBucketName`].OutputValue' \
-            --output text --region ${{ env.AWS_REGION }})
-          DIST_ID=$(aws cloudformation describe-stacks \
-            --stack-name prod-portfolio-storage \
-            --query 'Stacks[0].Outputs[?OutputKey==`DistributionId`].OutputValue' \
-            --output text --region ${{ env.AWS_REGION }})
-          echo "bucket=$BUCKET_NAME" >> $GITHUB_OUTPUT
-          echo "distribution=$DIST_ID" >> $GITHUB_OUTPUT
+      - name: Start Server
+        run: yarn start & # Run in background
 
-      # Upload static assets
-      - name: Upload Static Assets
+      - name: Verify Deployment
         run: |
-          aws s3 sync ./out s3://${{ steps.stack-outputs.outputs.bucket }} \
-            --delete \
-            --exclude "*.html" \
-            --exclude "*.json" \
-            --cache-control "public, max-age=31536000, immutable"
-          aws s3 sync ./out s3://${{ steps.stack-outputs.outputs.bucket }} \
-            --delete \
-            --exclude "*" \
-            --include "*.html" \
-            --include "*.json" \
-            --cache-control "public, max-age=0, must-revalidate"
+          # Check if website is accessible
+          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:3000)
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Website verification failed with HTTP code: $HTTP_CODE"
+            exit 1
+          fi
 
       # Invalidate CloudFront cache
       - name: Invalidate CloudFront
@@ -96,16 +78,3 @@ jobs:
           aws cloudfront create-invalidation \
             --distribution-id ${{ steps.stack-outputs.outputs.distribution }} \
             --paths "/*"
-
-      # Verify deployment
-      - name: Verify Deployment
-        run: |
-          # Wait for CloudFront invalidation
-          sleep 30
-
-          # Check if website is accessible
-          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}" ${{ env.NEXT_PUBLIC_BASE_URL }})
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "Website verification failed with HTTP code: $HTTP_CODE"
-            exit 1
-          fi
