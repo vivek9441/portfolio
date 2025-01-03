@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: "20"
           cache: "yarn"
-          cache-dependency-path: "**/yarn.lock"
+          cache-dependency-path: "**/yarn.lock" # Cache based on yarn.lock
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -59,6 +59,29 @@ jobs:
           NEXT_PUBLIC_BASE_URL: ${{ env.NEXT_PUBLIC_BASE_URL }}
           NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
         run: yarn build
+
+      # Get stack outputs
+      - name: Get Stack Outputs
+        id: stack-outputs
+        continue-on-error: true # Allow workflow to continue if this step fails
+        run: |
+          BUCKET_NAME=$(aws cloudformation describe-stacks \
+            --stack-name prod-portfolio-storage \
+            --query 'Stacks[0].Outputs[?OutputKey==`WebsiteBucketName`].OutputValue' \
+            --output text --region ${{ env.AWS_REGION }})
+          DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name prod-portfolio-storage \
+            --query 'Stacks[0].Outputs[?OutputKey==`DistributionId`].OutputValue' \
+            --output text --region ${{ env.AWS_REGION }})
+          echo "bucket=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "distribution=$DIST_ID" >> $GITHUB_OUTPUT
+
+      # Check if Get Stack Outputs failed
+      - name: Check if Stack Outputs were retrieved
+        if: steps.stack-outputs.outcome != 'success'
+        run: |
+          echo "Failed to retrieve stack outputs. Check permissions for deployment user and ensure the prod-portfolio-storage stack exists."
+          exit 1
 
       - name: Start Server
         run: yarn start & # Run in background
