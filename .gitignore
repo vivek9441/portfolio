@@ -36,6 +36,7 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+# .env.production
 
 # vercel
 .vercel
@@ -66,3 +67,8 @@ cdk.out
 
 # RepoMix
 repomix-output.txt
+
+# Prisma files
+/prisma/migrations
+/prisma/dev.db*
+/prisma/client
