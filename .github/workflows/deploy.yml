@@ -57,7 +57,7 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_URL: ${{ env.NEXT_PUBLIC_BASE_URL }}
           NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
-        run: yarn build:static
+        run: yarn build
 
       # Retrieve the S3 bucket name and CloudFront distribution from your CF stack
       - name: Get Stack Outputs
