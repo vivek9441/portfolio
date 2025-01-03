@@ -1,0 +1,105 @@
+name: Deploy Portfolio
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "infrastructure/**" # Don't trigger on CDK changes
+      - "**.md"
+  workflow_dispatch:
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "deploy"
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: us-east-1
+  NEXT_PUBLIC_BASE_URL: https://bjornmelin.io
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Install and build frontend
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build Next.js App
+        env:
+          NEXT_PUBLIC_BASE_URL: ${{ env.NEXT_PUBLIC_BASE_URL }}
+        run: yarn build
+
+      # Get stack outputs
+      - name: Get Stack Outputs
+        id: stack-outputs
+        run: |
+          BUCKET_NAME=$(aws cloudformation describe-stacks \
+            --stack-name prod-portfolio-storage \
+            --query 'Stacks[0].Outputs[?OutputKey==`WebsiteBucketName`].OutputValue' \
+            --output text)
+          DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name prod-portfolio-storage \
+            --query 'Stacks[0].Outputs[?OutputKey==`DistributionId`].OutputValue' \
+            --output text)
+          echo "::set-output name=bucket::$BUCKET_NAME"
+          echo "::set-output name=distribution::$DIST_ID"
+
+      # Upload static assets
+      - name: Upload Static Assets
+        run: |
+          aws s3 sync ./out s3://${{ steps.stack-outputs.outputs.bucket }} \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "index.html" \
+            --exclude "*.json"
+
+      # Upload HTML and JSON with no-cache
+      - name: Upload Dynamic Files
+        run: |
+          aws s3 sync ./out s3://${{ steps.stack-outputs.outputs.bucket }} \
+            --delete \
+            --cache-control "public, max-age=0, must-revalidate" \
+            --include "index.html" \
+            --include "*.json"
+
+      # Invalidate CloudFront cache
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ steps.stack-outputs.outputs.distribution }} \
+            --paths "/*"
+
+      # Verify deployment
+      - name: Verify Deployment
+        run: |
+          # Wait for CloudFront invalidation
+          sleep 30
+
+          # Check if website is accessible
+          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}" ${{ env.NEXT_PUBLIC_BASE_URL }})
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Website verification failed with HTTP code: $HTTP_CODE"
+            exit 1
+          fi
