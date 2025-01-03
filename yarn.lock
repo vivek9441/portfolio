@@ -1695,21 +1695,6 @@
   dependencies:
     "@tanstack/query-core" "5.62.7"
 
-"@trpc/client@^11.0.0-next.270":
-  version "11.0.0-rc.660"
-  resolved "https://registry.yarnpkg.com/@trpc/client/-/client-11.0.0-rc.660.tgz#36cc930f31251781b0f0f7d6d5e20f63ff113b43"
-  integrity sha512-bNpkZEfyMGKHynYFxdLpY8nJ1n7E3JHKcd4Pe2cagmpkzOEF9tFT3kzNf+eLI8XMG8196lTRR0J0W2/1Q8/cug==
-
-"@trpc/react-query@^11.0.0-next.270":
-  version "11.0.0-rc.660"
-  resolved "https://registry.yarnpkg.com/@trpc/react-query/-/react-query-11.0.0-rc.660.tgz#f2e255dc874eba69ab382428f5e76625ecad32fb"
-  integrity sha512-U2BHtYVt+8jt0a8Nrrk5cep8O1UZRxtTCBHtXie9kmJyQWWml43KfHxL5ssnFywaFrDZQz6Ec7kIoOxR/CQNfg==
-
-"@trpc/server@^11.0.0-next.270":
-  version "11.0.0-rc.660"
-  resolved "https://registry.yarnpkg.com/@trpc/server/-/server-11.0.0-rc.660.tgz#aaaeef3fdb22a86995f8b6940f9d45b63e876fdc"
-  integrity sha512-QUapcZCNOpHT7ng9LceGc9ImkboWd0Go9ryrduZpL+p4jdfaC6409AQ3x4XEW6Wu3yBmZAn4CywCsDrDhjDy/w==
-
 "@ts-morph/common@~0.19.0":
   version "0.19.0"
   resolved "https://registry.yarnpkg.com/@ts-morph/common/-/common-0.19.0.tgz#927fcd81d1bbc09c89c4a310a84577fb55f3694e"
