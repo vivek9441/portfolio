@@ -12,42 +12,74 @@ export class DeploymentStack extends cdk.Stack {
       userName: `${props.environment}-portfolio-deployment-user`,
     });
 
-    // Deployment policy
-    const deploymentPolicy = new iam.PolicyStatement({
+    // Deployment policy for S3 access
+    const s3DeploymentPolicy = new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: [
         "s3:PutObject",
         "s3:GetObject",
         "s3:ListBucket",
         "s3:DeleteObject",
+      ],
+      resources: [props.bucket.bucketArn, `${props.bucket.bucketArn}/*`],
+    });
+
+    // Deployment policy for CloudFront invalidation
+    const cloudFrontDeploymentPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
         "cloudfront:CreateInvalidation",
-        "cloudformation:DescribeStacks",
+        "cloudfront:GetInvalidation",
+        "cloudfront:ListInvalidations",
       ],
       resources: [
-        props.bucket.bucketArn,
-        `${props.bucket.bucketArn}/*`,
         `arn:aws:cloudfront::${this.account}:distribution/${props.distribution.distributionId}`,
+      ],
+    });
+
+    // Deployment policy for CloudFormation outputs
+    const cloudFormationPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ["cloudformation:DescribeStacks"],
+      resources: [
         `arn:aws:cloudformation:${this.region}:${this.account}:stack/${this.stackName}/*`,
       ],
     });
 
-    // Attach policy to user
-    deploymentUser.addToPolicy(deploymentPolicy);
+    // Attach policies to user
+    deploymentUser.addToPrincipalPolicy(s3DeploymentPolicy);
+    deploymentUser.addToPrincipalPolicy(cloudFrontDeploymentPolicy);
+    deploymentUser.addToPrincipalPolicy(cloudFormationPolicy);
 
     // Create access key for GitHub Actions
     const accessKey = new iam.CfnAccessKey(this, "DeploymentUserAccessKey", {
       userName: deploymentUser.userName,
     });
 
+    // Add tags
+    cdk.Tags.of(this).add("Stack", "Deployment");
+    cdk.Tags.of(this).add("Environment", props.environment);
+    for (const [key, value] of Object.entries(props.tags || {})) {
+      cdk.Tags.of(this).add(key, value);
+    }
+
     // Outputs
+    new cdk.CfnOutput(this, "DeploymentUserArn", {
+      value: deploymentUser.userArn,
+      description: "ARN of the deployment IAM user",
+      exportName: `${props.environment}-deployment-user-arn`,
+    });
+
     new cdk.CfnOutput(this, "DeploymentUserAccessKeyId", {
       value: accessKey.ref,
       description: "AWS access key ID for GitHub Actions",
+      exportName: `${props.environment}-deployment-access-key-id`,
     });
 
     new cdk.CfnOutput(this, "DeploymentUserSecretAccessKey", {
       value: accessKey.attrSecretAccessKey,
       description: "AWS secret access key for GitHub Actions",
+      exportName: `${props.environment}-deployment-secret-access-key`,
     });
   }
 }

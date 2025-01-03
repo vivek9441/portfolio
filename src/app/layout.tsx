@@ -57,7 +57,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Providers disableTransitionOnChange>
+        <Providers>
           <div className="relative min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-grow container mx-auto px-4 pt-16 pb-8">

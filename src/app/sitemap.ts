@@ -1,31 +1,24 @@
-import { type MetadataRoute } from 'next';
+import { MetadataRoute } from "next";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://bjornmelin.com';
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://bjornmelin.io";
 
-  // Add all static routes
-  const routes = [
-    '',
-    '/about',
-    '/projects',
-    '/contact',
-    '/blog',
-  ].map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: route === '' ? 1 : 0.8,
-  }));
+export default function sitemap(): MetadataRoute.Sitemap {
+  const staticRoutes = ["/", "/about", "/projects", "/contact"].map(
+    (route) => ({
+      url: `${baseUrl}${route}`,
+      lastModified: new Date().toISOString(),
+      changeFrequency: "monthly" as const,
+      priority: route === "/" ? 1 : 0.8,
+    })
+  );
 
-  // TODO: Add dynamic routes for blog posts and projects
-  // Example:
-  // const posts = await getPosts();
-  // const postRoutes = posts.map((post) => ({
-  //   url: `${baseUrl}/blog/${post.slug}`,
-  //   lastModified: new Date(post.updatedAt),
+  // TODO: Add dynamic routes for projects
+  // const projectRoutes = projects.map((project) => ({
+  //   url: `${baseUrl}/projects/${project.slug}`,
+  //   lastModified: project.updatedAt,
   //   changeFrequency: 'monthly' as const,
   //   priority: 0.6,
   // }));
 
-  return [...routes];
-} 
+  return [...staticRoutes];
+}

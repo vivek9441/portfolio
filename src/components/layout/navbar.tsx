@@ -44,13 +44,13 @@ export function Navbar() {
             >
               Projects
             </Link>
-            <NavSeparator />
+            {/* <NavSeparator />
             <Link
               href="/blog"
               className="text-foreground/60 hover:text-foreground"
             >
               Blog
-            </Link>
+            </Link> */}
             <NavSeparator />
             <Link
               href="/contact"

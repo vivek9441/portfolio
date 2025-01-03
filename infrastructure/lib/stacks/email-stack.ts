@@ -5,6 +5,8 @@ import * as lambda from "aws-cdk-lib/aws-lambda-nodejs";
 import * as lambdaCore from "aws-cdk-lib/aws-lambda";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as targets from "aws-cdk-lib/aws-route53-targets"; // Correct import for targets
 import { Construct } from "constructs";
 import { EmailStackProps } from "../types/stack-props";
 import * as path from "path";
@@ -16,42 +18,58 @@ export class EmailStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: EmailStackProps) {
     super(scope, id, props);
 
+    const domain = props.domainName;
+    const subdomain = `api.${domain}`;
+    const apiEndpoint = `https://${subdomain}`;
+
     // Create SES Domain Identity
     const domainIdentity = new ses.EmailIdentity(this, "DomainIdentity", {
-      identity: ses.Identity.domain(props.domainName),
+      identity: ses.Identity.domain(domain),
     });
+
+    // Get verification record attributes
+    const verificationRecord = {
+      recordName: `_amazonses.${domain}`,
+      recordValue: domainIdentity.emailIdentityArn,
+    };
 
     // Create DNS TXT record for domain verification
     new route53.TxtRecord(this, "SESVerificationRecord", {
       zone: props.hostedZone,
-      recordName: `_amazonses.${props.domainName}`,
-      values: [domainIdentity.emailIdentityName],
-      ttl: cdk.Duration.hours(1),
+      recordName: verificationRecord.recordName,
+      values: [verificationRecord.recordValue],
+      ttl: cdk.Duration.minutes(60),
     });
 
     // Create DKIM CNAME records
-    for (let i = 1; i <= 3; i++) {
-      new route53.CnameRecord(this, `DkimRecord${i}`, {
+    const dkimTokens = [
+      domainIdentity.dkimDnsTokenName1,
+      domainIdentity.dkimDnsTokenName2,
+      domainIdentity.dkimDnsTokenName3,
+    ];
+
+    dkimTokens.forEach((dkimToken, index) => {
+      new route53.CnameRecord(this, `DKIMCNAMERecord${index}`, {
         zone: props.hostedZone,
-        recordName: `${i}._domainkey.${props.domainName}`,
-        domainName: `${i}.dkim.amazonses.${this.region}.amazonaws.com`,
-        ttl: cdk.Duration.hours(1),
+        recordName: `${dkimToken}._domainkey.${domain}`,
+        domainName: `${dkimToken}.dkim.amazonses.com`,
       });
-    }
+    });
 
     // Create MX record for receiving email
     new route53.MxRecord(this, "SESMxRecord", {
       zone: props.hostedZone,
+      recordName: domain,
       values: [
         {
           hostName: `inbound-smtp.${this.region}.amazonaws.com`,
           priority: 10,
         },
       ],
-      ttl: cdk.Duration.hours(1),
+      ttl: cdk.Duration.minutes(60),
     });
 
-    // Create Lambda function for email processing
+    // Create Lambda function for contact form
     this.emailFunction = new lambda.NodejsFunction(
       this,
       "ContactFormFunction",
@@ -60,10 +78,10 @@ export class EmailStack extends cdk.Stack {
         handler: "handler",
         entry: path.join(__dirname, "../functions/contact-form/index.ts"),
         environment: {
-          SENDER_EMAIL: `no-reply@${props.domainName}`,
+          SENDER_EMAIL: `no-reply@${domain}`,
           RECIPIENT_EMAIL: "bjornmelin16@gmail.com",
           REGION: this.region,
-          ALLOWED_ORIGIN: `https://${props.domainName}`,
+          ALLOWED_ORIGIN: apiEndpoint, // Use the secure API endpoint
         },
         bundling: {
           minify: true,
@@ -81,12 +99,46 @@ export class EmailStack extends cdk.Stack {
     this.api = new apigateway.RestApi(this, "ContactApi", {
       restApiName: "Contact Form API",
       description: "API for contact form submissions",
-      defaultCorsPreflightOptions: {
-        allowOrigins: [`https://${props.domainName}`],
-        allowMethods: ["POST", "OPTIONS"],
-        allowHeaders: ["Content-Type"],
-        maxAge: cdk.Duration.hours(1),
+      endpointConfiguration: {
+        types: [apigateway.EndpointType.REGIONAL],
       },
+      deployOptions: {
+        stageName: "prod", // Consider using a stage variable
+        loggingLevel: apigateway.MethodLoggingLevel.INFO,
+        dataTraceEnabled: true,
+        tracingEnabled: true,
+        metricsEnabled: true,
+      },
+    });
+
+    // Create a certificate for the custom domain
+    const certificate = new acm.Certificate(this, "ApiCertificate", {
+      domainName: subdomain,
+      validation: acm.CertificateValidation.fromDns(props.hostedZone),
+    });
+
+    // Create a custom domain name for the API
+    const customDomain = new apigateway.DomainName(this, "ApiCustomDomain", {
+      domainName: subdomain,
+      certificate: certificate,
+      endpointType: apigateway.EndpointType.REGIONAL,
+      securityPolicy: apigateway.SecurityPolicy.TLS_1_2,
+    });
+
+    // Create a base path mapping for the API
+    new apigateway.BasePathMapping(this, "ApiBasePathMapping", {
+      domainName: customDomain,
+      restApi: this.api,
+      stage: this.api.deploymentStage,
+    });
+
+    // Create a subdomain DNS record for the API Gateway
+    new route53.ARecord(this, "ApiGatewayDnsRecord", {
+      zone: props.hostedZone,
+      recordName: subdomain,
+      target: route53.RecordTarget.fromAlias(
+        new targets.ApiGatewayDomain(customDomain)
+      ),
     });
 
     // Add API Gateway resource and method
@@ -101,14 +153,21 @@ export class EmailStack extends cdk.Stack {
       effect: iam.Effect.ALLOW,
       actions: ["ses:SendEmail", "ses:SendRawEmail"],
       resources: [
-        `arn:aws:ses:${this.region}:${this.account}:identity/${props.domainName}`,
+        `arn:aws:ses:${this.region}:${this.account}:identity/${domain}`,
       ],
     });
 
-    // Attach the SES policy to the Lambda function
+    // Attach SES policy to Lambda function
     this.emailFunction.addToRolePolicy(sesPolicy);
 
-    // Stack outputs
+    // Add tags
+    cdk.Tags.of(this).add("Stack", "Email");
+    cdk.Tags.of(this).add("Environment", props.environment);
+    for (const [key, value] of Object.entries(props.tags || {})) {
+      cdk.Tags.of(this).add(key, value);
+    }
+
+    // Outputs
     new cdk.CfnOutput(this, "EmailFunctionArn", {
       value: this.emailFunction.functionArn,
       description: "Contact Form Lambda Function ARN",
@@ -121,14 +180,14 @@ export class EmailStack extends cdk.Stack {
       exportName: `${props.environment}-api-endpoint`,
     });
 
-    new cdk.CfnOutput(this, "EmailDomainIdentityName", {
-      value: domainIdentity.emailIdentityName,
-      description: "SES Domain Identity Name",
-      exportName: `${props.environment}-ses-domain-identity-name`,
+    new cdk.CfnOutput(this, "ApiGatewayUrl", {
+      value: apiEndpoint,
+      description: "API Gateway URL",
+      exportName: `${props.environment}-api-gateway-url`,
     });
 
     new cdk.CfnOutput(this, "SenderEmailAddress", {
-      value: `no-reply@${props.domainName}`,
+      value: `no-reply@${domain}`,
       description: "Sender Email Address",
       exportName: `${props.environment}-sender-email`,
     });
