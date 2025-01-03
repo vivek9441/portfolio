@@ -35,6 +35,7 @@ jobs:
         with:
           node-version: "20"
           cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -43,10 +44,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Install and build frontend
-      - name: Install Dependencies
+      # Install dependencies in the root directory
+      - name: Install Root Dependencies
         run: yarn install --frozen-lockfile
 
+      # Install dependencies in the infrastructure directory
+      - name: Install Infrastructure Dependencies
+        working-directory: ./infrastructure
+        run: yarn install --frozen-lockfile
+
+      # Build the Next.js app in the root directory
       - name: Build Next.js App
         env:
           NEXT_PUBLIC_BASE_URL: ${{ env.NEXT_PUBLIC_BASE_URL }}
