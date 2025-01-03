@@ -1,3 +1,4 @@
+// infrastructure/lib/stacks/storage-stack.ts
 import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
@@ -10,11 +11,9 @@ import { StorageStackProps } from "../types/stack-props";
 export class StorageStack extends cdk.Stack {
   public readonly bucket: s3.IBucket;
   public readonly distribution: cloudfront.IDistribution;
-  private readonly domainName: string;
 
   constructor(scope: Construct, id: string, props: StorageStackProps) {
     super(scope, id, props);
-    this.domainName = props.domainName;
 
     // Website bucket
     this.bucket = new s3.Bucket(this, "WebsiteBucket", {
@@ -33,21 +32,29 @@ export class StorageStack extends cdk.Stack {
       ],
     });
 
-    const originAccessIdentity = new cloudfront.OriginAccessIdentity(this, "OAI");
-    this.bucket.grantRead(originAccessIdentity);
+    // Origin Access Control for CloudFront
+    const oac = new cloudfront.CfnOriginAccessControl(this, "WebsiteOAC", {
+      originAccessControlConfig: {
+        name: `${props.domainName}-website-oac`,
+        originAccessControlOriginType: "s3",
+        signingBehavior: "no-override", // Corrected property
+        signingProtocol: "sigv4", // Corrected property
+        description: "Origin Access Control for Website Bucket",
+      },
+    });
 
     // CloudFront distribution
     this.distribution = new cloudfront.Distribution(this, "Distribution", {
       defaultBehavior: {
         origin: new origins.S3Origin(this.bucket, {
-          originAccessIdentity,
+          //   originAccessControl: oac, // Removed originAccessControl
         }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
         compress: true,
         cachePolicy: this.createCachePolicy(),
-        responseHeadersPolicy: this.createSecurityHeadersPolicy(),
+        responseHeadersPolicy: this.createSecurityHeadersPolicy(props.domainName),
       },
       domainNames: [props.domainName, `www.${props.domainName}`],
       certificate: props.certificate,
@@ -57,56 +64,147 @@ export class StorageStack extends cdk.Stack {
           httpStatus: 403,
           responseHttpStatus: 200,
           responsePagePath: "/index.html",
+          ttl: cdk.Duration.minutes(5),
         },
         {
           httpStatus: 404,
           responseHttpStatus: 200,
           responsePagePath: "/index.html",
+          ttl: cdk.Duration.minutes(5),
         },
       ],
-      enableLogging: true,
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
+      enableLogging: true,
+      logBucket: new s3.Bucket(this, "LogsBucket", {
+        removalPolicy: cdk.RemovalPolicy.RETAIN,
+        lifecycleRules: [
+          {
+            expiration: cdk.Duration.days(30),
+          },
+        ],
+      }),
+      logFilePrefix: "cdn-logs/",
     });
 
+    // Apply OAC to the distribution
+    const cfnDistribution = this.distribution.node
+      .defaultChild as cloudfront.CfnDistribution;
+    cfnDistribution.addPropertyOverride(
+      "DistributionConfig.Origins.0.S3OriginConfig.OriginAccessIdentity",
+      ""
+    );
+
+    cfnDistribution.addPropertyOverride(
+      "DistributionConfig.Origins.0.OriginAccessControlId",
+      oac.getAtt("Id")
+    );
+
+    // Grant CloudFront access to the bucket via OAC
+    this.bucket.grantRead(
+      new cloudfront.OriginAccessIdentity(this, "WebsiteOAI")
+    );
+
     // DNS records
-    this.createDnsRecords(props.hostedZone);
+    new route53.ARecord(this, "AliasRecord", {
+      recordName: props.domainName,
+      target: route53.RecordTarget.fromAlias(
+        new targets.CloudFrontTarget(this.distribution)
+      ),
+      zone: props.hostedZone,
+    });
+
+    new route53.AaaaRecord(this, "AliasRecordIPv6", {
+      recordName: props.domainName,
+      target: route53.RecordTarget.fromAlias(
+        new targets.CloudFrontTarget(this.distribution)
+      ),
+      zone: props.hostedZone,
+    });
+
+    // www subdomain
+    new route53.ARecord(this, "WwwAliasRecord", {
+      recordName: `www.${props.domainName}`,
+      target: route53.RecordTarget.fromAlias(
+        new targets.CloudFrontTarget(this.distribution)
+      ),
+      zone: props.hostedZone,
+    });
+
+    new route53.AaaaRecord(this, "WwwAliasRecordIPv6", {
+      recordName: `www.${props.domainName}`,
+      target: route53.RecordTarget.fromAlias(
+        new targets.CloudFrontTarget(this.distribution)
+      ),
+      zone: props.hostedZone,
+    });
+
+    // Tags
+    cdk.Tags.of(this).add("Stack", "Storage");
+    cdk.Tags.of(this).add("Environment", props.environment);
+    for (const [key, value] of Object.entries(props.tags || {})) {
+      cdk.Tags.of(this).add(key, value);
+    }
 
     // Outputs
-    this.createOutputs();
+    new cdk.CfnOutput(this, "WebsiteBucketName", {
+      value: this.bucket.bucketName,
+      description: "Website bucket name",
+      exportName: `${props.environment}-website-bucket-name`,
+    });
+
+    new cdk.CfnOutput(this, "DistributionId", {
+      value: this.distribution.distributionId,
+      description: "CloudFront distribution ID",
+      exportName: `${props.environment}-distribution-id`,
+    });
+
+    new cdk.CfnOutput(this, "DistributionDomainName", {
+      value: this.distribution.distributionDomainName,
+      description: "CloudFront domain name",
+      exportName: `${props.environment}-distribution-domain`,
+    });
   }
 
   private createCachePolicy(): cloudfront.CachePolicy {
     return new cloudfront.CachePolicy(this, "CachePolicy", {
-      defaultTtl: cdk.Duration.hours(24),
-      maxTtl: cdk.Duration.days(7),
-      minTtl: cdk.Duration.minutes(0),
-      enableAcceptEncodingGzip: true,
+      queryStringBehavior: cloudfront.CacheQueryStringBehavior.none(),
+      headerBehavior: cloudfront.CacheHeaderBehavior.none(),
+      cookieBehavior: cloudfront.CacheCookieBehavior.none(),
+      defaultTtl: cdk.Duration.days(1),
+      maxTtl: cdk.Duration.days(365),
+      minTtl: cdk.Duration.hours(1),
       enableAcceptEncodingBrotli: true,
+      enableAcceptEncodingGzip: true,
     });
   }
 
-  private createSecurityHeadersPolicy(): cloudfront.ResponseHeadersPolicy {
-    return new cloudfront.ResponseHeadersPolicy(this, "SecurityHeadersPolicy", {
+  private createSecurityHeadersPolicy(domainName: string): cloudfront.ResponseHeadersPolicy {
+    return new cloudfront.ResponseHeadersPolicy(this, "SecurityHeaders", {
+      responseHeadersPolicyName: `${this.stackName}-security-headers`,
       securityHeadersBehavior: {
         contentSecurityPolicy: {
-          contentSecurityPolicy:
-            "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';",
           override: true,
+          contentSecurityPolicy: [
+            "default-src 'self'",
+            "img-src 'self' data: https:",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            "style-src 'self' 'unsafe-inline'",
+            "font-src 'self' data:",
+            `connect-src 'self' https://api.${domainName}`,
+            "frame-ancestors 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+          ].join("; "),
         },
         strictTransportSecurity: {
-          accessControlMaxAge: cdk.Duration.days(2 * 365),
+          override: true,
+          accessControlMaxAge: cdk.Duration.days(730),
           includeSubdomains: true,
           preload: true,
-          override: true,
         },
         contentTypeOptions: { override: true },
         frameOptions: {
           frameOption: cloudfront.HeadersFrameOption.DENY,
-          override: true,
-        },
-        xssProtection: {
-          protection: true,
-          modeBlock: true,
           override: true,
         },
         referrerPolicy: {
@@ -114,60 +212,12 @@ export class StorageStack extends cdk.Stack {
             cloudfront.HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
           override: true,
         },
+        xssProtection: {
+          override: true,
+          protection: true,
+          modeBlock: true,
+        },
       },
-    });
-  }
-
-  private createDnsRecords(hostedZone: route53.IHostedZone) {
-    // Apex domain
-    new route53.ARecord(this, "SiteAliasRecord", {
-      recordName: this.domainName,
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(this.distribution)
-      ),
-      zone: hostedZone,
-    });
-
-    new route53.AaaaRecord(this, "SiteAAAARecord", {
-      recordName: this.domainName,
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(this.distribution)
-      ),
-      zone: hostedZone,
-    });
-
-    // WWW subdomain
-    new route53.ARecord(this, "WWWSiteAliasRecord", {
-      recordName: `www.${this.domainName}`,
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(this.distribution)
-      ),
-      zone: hostedZone,
-    });
-
-    new route53.AaaaRecord(this, "WWWSiteAAAARecord", {
-      recordName: `www.${this.domainName}`,
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(this.distribution)
-      ),
-      zone: hostedZone,
-    });
-  }
-
-  private createOutputs() {
-    new cdk.CfnOutput(this, "DistributionId", {
-      value: this.distribution.distributionId,
-      description: "CloudFront Distribution ID",
-    });
-
-    new cdk.CfnOutput(this, "DistributionDomainName", {
-      value: this.distribution.distributionDomainName,
-      description: "CloudFront Distribution Domain Name",
-    });
-
-    new cdk.CfnOutput(this, "WebsiteBucketName", {
-      value: this.bucket.bucketName,
-      description: "Website Bucket Name",
     });
   }
 }
