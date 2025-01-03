@@ -1,4 +1,3 @@
-// infrastructure/lib/stacks/storage-stack.ts
 import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
@@ -32,13 +31,44 @@ export class StorageStack extends cdk.Stack {
       ],
     });
 
+    // Create the CloudFront logs bucket with Object Ownership set to BucketOwnerPreferred
+    const logsBucket = new s3.Bucket(this, "LogsBucket", {
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED, // Enable object ownership
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      lifecycleRules: [
+        {
+          expiration: cdk.Duration.days(30),
+        },
+      ],
+    });
+
+    // Grant CloudFront access to the log bucket
+    logsBucket.addToResourcePolicy(
+      new cdk.aws_iam.PolicyStatement({
+        effect: cdk.aws_iam.Effect.ALLOW,
+        principals: [
+          new cdk.aws_iam.ServicePrincipal("logging.s3.amazonaws.com"),
+        ],
+        actions: ["s3:PutObject"],
+        resources: [`${logsBucket.bucketArn}/*`],
+        conditions: {
+          StringEquals: {
+            "aws:SourceAccount": this.account,
+          },
+        },
+      })
+    );
+
     // Origin Access Control for CloudFront
     const oac = new cloudfront.CfnOriginAccessControl(this, "WebsiteOAC", {
       originAccessControlConfig: {
         name: `${props.domainName}-website-oac`,
         originAccessControlOriginType: "s3",
-        signingBehavior: "no-override", // Corrected property
-        signingProtocol: "sigv4", // Corrected property
+        signingBehavior: "no-override",
+        signingProtocol: "sigv4",
         description: "Origin Access Control for Website Bucket",
       },
     });
@@ -46,9 +76,7 @@ export class StorageStack extends cdk.Stack {
     // CloudFront distribution
     this.distribution = new cloudfront.Distribution(this, "Distribution", {
       defaultBehavior: {
-        origin: new origins.S3Origin(this.bucket, {
-          //   originAccessControl: oac, // Removed originAccessControl
-        }),
+        origin: new origins.S3Origin(this.bucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
@@ -75,14 +103,7 @@ export class StorageStack extends cdk.Stack {
       ],
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
       enableLogging: true,
-      logBucket: new s3.Bucket(this, "LogsBucket", {
-        removalPolicy: cdk.RemovalPolicy.RETAIN,
-        lifecycleRules: [
-          {
-            expiration: cdk.Duration.days(30),
-          },
-        ],
-      }),
+      logBucket: logsBucket,
       logFilePrefix: "cdn-logs/",
     });
 
