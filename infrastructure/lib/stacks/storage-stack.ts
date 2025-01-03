@@ -33,10 +33,15 @@ export class StorageStack extends cdk.Stack {
       ],
     });
 
+    const originAccessIdentity = new cloudfront.OriginAccessIdentity(this, "OAI");
+    this.bucket.grantRead(originAccessIdentity);
+
     // CloudFront distribution
     this.distribution = new cloudfront.Distribution(this, "Distribution", {
       defaultBehavior: {
-        origin: new origins.S3Origin(this.bucket),
+        origin: new origins.S3Origin(this.bucket, {
+          originAccessIdentity,
+        }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
@@ -48,6 +53,11 @@ export class StorageStack extends cdk.Stack {
       certificate: props.certificate,
       defaultRootObject: "index.html",
       errorResponses: [
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: "/index.html",
+        },
         {
           httpStatus: 404,
           responseHttpStatus: 200,
@@ -67,9 +77,9 @@ export class StorageStack extends cdk.Stack {
 
   private createCachePolicy(): cloudfront.CachePolicy {
     return new cloudfront.CachePolicy(this, "CachePolicy", {
-      defaultTtl: cdk.Duration.days(7),
-      maxTtl: cdk.Duration.days(30),
-      minTtl: cdk.Duration.days(1),
+      defaultTtl: cdk.Duration.hours(24),
+      maxTtl: cdk.Duration.days(7),
+      minTtl: cdk.Duration.minutes(0),
       enableAcceptEncodingGzip: true,
       enableAcceptEncodingBrotli: true,
     });
