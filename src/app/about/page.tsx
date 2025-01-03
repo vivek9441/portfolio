@@ -13,4 +13,4 @@ export default function AboutPage() {
       <AboutDetail />
     </main>
   );
-} 
+}

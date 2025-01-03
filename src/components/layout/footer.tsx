@@ -35,12 +35,12 @@ export function Footer() {
               >
                 Projects
               </Link>
-              <Link
+              {/* <Link
                 href="/blog"
                 className="text-sm text-foreground/60 hover:text-foreground"
               >
                 Blog
-              </Link>
+              </Link> */}
               <Link
                 href="/contact"
                 className="text-sm text-foreground/60 hover:text-foreground"
