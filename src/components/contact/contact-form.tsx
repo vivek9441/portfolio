@@ -10,7 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+
+interface APIErrorResponse {
+  error: string;
+  code?: string;
+  details?: Array<{ message: string; path: string[] }>;
+}
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,9 +29,11 @@ export function ContactForm() {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    setError,
+    formState: { errors, isValid },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
+    mode: "onBlur",
   });
 
   const onSubmit = async (data: ContactFormData) => {
@@ -44,9 +52,18 @@ export function ContactForm() {
         }
       );
 
-      const result = await response.json();
+      const result = (await response.json()) as APIErrorResponse;
 
       if (!response.ok) {
+        // Handle validation errors
+        if (response.status === 400 && result.details) {
+          result.details.forEach(({ message, path }) => {
+            const field = path[0] as keyof ContactFormData;
+            setError(field, { message });
+          });
+          throw new Error("Please check the form for errors");
+        }
+
         throw new Error(result.error || "Failed to send message");
       }
 
@@ -88,7 +105,13 @@ export function ContactForm() {
           <AlertTitle>Failed to Send Message</AlertTitle>
           <AlertDescription>
             Please try again. If the problem persists, you can email me directly
-            at {process.env.NEXT_PUBLIC_CONTACT_EMAIL}.
+            at{" "}
+            <a
+              href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL}`}
+              className="underline hover:text-red-400"
+            >
+              {process.env.NEXT_PUBLIC_CONTACT_EMAIL}
+            </a>
           </AlertDescription>
         </Alert>
       )}
@@ -104,6 +127,7 @@ export function ContactForm() {
             aria-describedby={errors.name ? "name-error" : undefined}
             aria-invalid={!!errors.name}
             disabled={isSubmitting}
+            className={errors.name ? "border-red-500" : ""}
           />
           {errors.name && (
             <p id="name-error" className="text-sm text-red-500">
@@ -122,6 +146,7 @@ export function ContactForm() {
             aria-describedby={errors.email ? "email-error" : undefined}
             aria-invalid={!!errors.email}
             disabled={isSubmitting}
+            className={errors.email ? "border-red-500" : ""}
           />
           {errors.email && (
             <p id="email-error" className="text-sm text-red-500">
@@ -140,6 +165,7 @@ export function ContactForm() {
             aria-invalid={!!errors.message}
             disabled={isSubmitting}
             rows={5}
+            className={errors.message ? "border-red-500" : ""}
           />
           {errors.message && (
             <p id="message-error" className="text-sm text-red-500">
@@ -148,8 +174,19 @@ export function ContactForm() {
           )}
         </div>
 
-        <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? "Sending..." : "Send Message"}
+        <Button
+          type="submit"
+          disabled={isSubmitting || !isValid}
+          className="w-full"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            "Send Message"
+          )}
         </Button>
       </form>
     </div>
