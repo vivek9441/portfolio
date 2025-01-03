@@ -3,20 +3,19 @@ import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 const ses = new SESClient({ region: process.env.REGION });
 
+// Allowed origins (replace with your actual domains)
+const allowedOrigins = [
+  process.env.ALLOWED_ORIGIN!,
+  `https://${process.env.DOMAIN_NAME}`,
+  `https://www.${process.env.DOMAIN_NAME}`,
+];
+
 // Types
 interface ContactFormData {
   name: string;
   email: string;
   message: string;
 }
-
-// CORS headers with default fallback for ALLOWED_ORIGIN
-const corsHeaders = {
-  "Access-Control-Allow-Origin": process.env.ALLOWED_ORIGIN || "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Max-Age": "3600",
-} as const;
 
 function validateInput(data: ContactFormData): string | null {
   if (!data.name || typeof data.name !== "string" || data.name.length < 2) {
@@ -38,6 +37,30 @@ function validateInput(data: ContactFormData): string | null {
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  const origin = event.headers.origin || event.headers.Origin;
+
+  // CORS headers
+  const corsHeaders: {
+    'Access-Control-Allow-Headers': string;
+    'Access-Control-Allow-Methods': string;
+    'Access-Control-Allow-Origin'?: string;
+  } = {
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+
+  // Validate the origin
+  if (origin && allowedOrigins.includes(origin)) {
+    corsHeaders["Access-Control-Allow-Origin"] = origin;
+  } else {
+    // Optionally, you can return an error response for disallowed origins
+    return {
+      statusCode: 403,
+      headers: corsHeaders,
+      body: JSON.stringify({ error: "Forbidden" }),
+    };
+  }
+
   // Handle CORS preflight
   if (event.httpMethod === "OPTIONS") {
     return {
