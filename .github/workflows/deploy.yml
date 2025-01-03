@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AWS_REGION: us-east-1 # Changed to variable
+  AWS_REGION: us-east-1
   NEXT_PUBLIC_BASE_URL: https://bjornmelin.io
   NEXT_PUBLIC_API_URL: https://api.bjornmelin.io
 
