@@ -74,6 +74,7 @@ yarn deploy:dns
 yarn deploy:storage
 yarn deploy:deployment
 yarn deploy:monitoring
+yarn deploy:email
 ```
 
 ### Troubleshooting Steps

@@ -10,9 +10,11 @@ import { StorageStackProps } from "../types/stack-props";
 export class StorageStack extends cdk.Stack {
   public readonly bucket: s3.IBucket;
   public readonly distribution: cloudfront.IDistribution;
+  private readonly props: StorageStackProps;
 
   constructor(scope: Construct, id: string, props: StorageStackProps) {
     super(scope, id, props);
+    this.props = props;
 
     // Website bucket
     this.bucket = new s3.Bucket(this, "WebsiteBucket", {
@@ -82,7 +84,7 @@ export class StorageStack extends cdk.Stack {
         cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
         compress: true,
         cachePolicy: this.createCachePolicy(),
-        responseHeadersPolicy: this.createSecurityHeadersPolicy(props.domainName),
+        responseHeadersPolicy: this.createSecurityHeadersPolicy(),
       },
       domainNames: [props.domainName, `www.${props.domainName}`],
       certificate: props.certificate,
@@ -118,11 +120,6 @@ export class StorageStack extends cdk.Stack {
     cfnDistribution.addPropertyOverride(
       "DistributionConfig.Origins.0.OriginAccessControlId",
       oac.getAtt("Id")
-    );
-
-    // Grant CloudFront access to the bucket via OAC
-    this.bucket.grantRead(
-      new cloudfront.OriginAccessIdentity(this, "WebsiteOAI")
     );
 
     // DNS records
@@ -199,7 +196,7 @@ export class StorageStack extends cdk.Stack {
     });
   }
 
-  private createSecurityHeadersPolicy(domainName: string): cloudfront.ResponseHeadersPolicy {
+  private createSecurityHeadersPolicy(): cloudfront.ResponseHeadersPolicy {
     return new cloudfront.ResponseHeadersPolicy(this, "SecurityHeaders", {
       responseHeadersPolicyName: `${this.stackName}-security-headers`,
       securityHeadersBehavior: {
@@ -211,7 +208,7 @@ export class StorageStack extends cdk.Stack {
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
             "style-src 'self' 'unsafe-inline'",
             "font-src 'self' data:",
-            `connect-src 'self' https://api.${domainName}`,
+            `connect-src 'self' https://api.${this.props.domainName}`,
             "frame-ancestors 'none'",
             "base-uri 'self'",
             "form-action 'self'",
