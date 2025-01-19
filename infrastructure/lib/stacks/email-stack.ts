@@ -10,6 +10,7 @@ import * as targets from "aws-cdk-lib/aws-route53-targets"; // Correct import fo
 import { Construct } from "constructs";
 import { EmailStackProps } from "../types/stack-props";
 import * as path from "path";
+import * as logs from "aws-cdk-lib/aws-logs";
 
 export class EmailStack extends cdk.Stack {
   public readonly emailFunction: lambda.NodejsFunction;
@@ -95,6 +96,24 @@ export class EmailStack extends cdk.Stack {
       }
     );
 
+    // Create API Gateway Logging Role
+    const apiGatewayLoggingRole = new iam.Role(this, "ApiGatewayLoggingRole", {
+      assumedBy: new iam.ServicePrincipal("apigateway.amazonaws.com"),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName(
+          "service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+        ),
+      ],
+    });
+
+    // Create CloudWatch Log Group for API Gateway
+    const apiLogGroup = new logs.LogGroup(this, "ApiGatewayLogs");
+
+    // Set up API Gateway Account settings
+    new apigateway.CfnAccount(this, "ApiGatewayAccount", {
+      cloudWatchRoleArn: apiGatewayLoggingRole.roleArn
+    });
+
     // Create API Gateway
     this.api = new apigateway.RestApi(this, "ContactApi", {
       restApiName: "Contact Form API",
@@ -103,11 +122,12 @@ export class EmailStack extends cdk.Stack {
         types: [apigateway.EndpointType.REGIONAL],
       },
       deployOptions: {
-        stageName: "prod", // Consider using a stage variable
+        stageName: "prod",
         loggingLevel: apigateway.MethodLoggingLevel.INFO,
         dataTraceEnabled: true,
         tracingEnabled: true,
         metricsEnabled: true,
+        accessLogDestination: new apigateway.LogGroupLogDestination(apiLogGroup),
       },
     });
 
@@ -145,8 +165,26 @@ export class EmailStack extends cdk.Stack {
     const contact = this.api.root.addResource("contact");
     contact.addMethod(
       "POST",
-      new apigateway.LambdaIntegration(this.emailFunction)
+      new apigateway.LambdaIntegration(this.emailFunction),
+      {
+        authorizationType: apigateway.AuthorizationType.NONE, // Allow unauthenticated access
+        apiKeyRequired: false,
+      }
     );
+
+    // Add CORS options to the API
+    const corsOptions: apigateway.CorsOptions = {
+      allowOrigins: [
+        `https://${props.domainName}`,
+        `https://www.${props.domainName}`,
+        process.env.ALLOWED_ORIGIN!,
+      ],
+      allowMethods: ['POST', 'OPTIONS'],
+      allowHeaders: ['Content-Type'],
+    };
+
+    // Apply CORS to the contact resource
+    contact.addCorsPreflight(corsOptions);
 
     // Create custom policy for SES permissions
     const sesPolicy = new iam.PolicyStatement({

@@ -5,11 +5,10 @@ on:
     branches:
       - main
     paths-ignore:
-      - "infrastructure/**" # Don't trigger on CDK changes
+      - "infrastructure/**"
       - "**.md"
   workflow_dispatch:
 
-# Allow only one concurrent deployment
 concurrency:
   group: "deploy"
   cancel-in-progress: true
@@ -17,6 +16,7 @@ concurrency:
 env:
   AWS_REGION: us-east-1
   NEXT_PUBLIC_BASE_URL: https://bjornmelin.io
+  NEXT_PUBLIC_API_URL: https://api.bjornmelin.io
 
 jobs:
   deploy:
@@ -34,6 +34,7 @@ jobs:
         with:
           node-version: "20"
           cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -42,64 +43,65 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Install and build frontend
-      - name: Install Dependencies
+      # Install root dependencies (i.e., for Next.js)
+      - name: Install Root Dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build Next.js App
+      # Install dependencies in the infrastructure directory (if needed)
+      - name: Install Infrastructure Dependencies
+        working-directory: ./infrastructure
+        run: yarn install --frozen-lockfile
+
+      # Build the Next.js app & export static files
+      - name: Build Next.js App (Static Export)
         env:
           NEXT_PUBLIC_BASE_URL: ${{ env.NEXT_PUBLIC_BASE_URL }}
+          NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
         run: yarn build
 
-      # Get stack outputs
+      # Retrieve the S3 bucket name and CloudFront distribution from your CF stack
       - name: Get Stack Outputs
         id: stack-outputs
+        continue-on-error: true
         run: |
           BUCKET_NAME=$(aws cloudformation describe-stacks \
             --stack-name prod-portfolio-storage \
             --query 'Stacks[0].Outputs[?OutputKey==`WebsiteBucketName`].OutputValue' \
-            --output text)
+            --output text --region ${{ env.AWS_REGION }})
+
           DIST_ID=$(aws cloudformation describe-stacks \
             --stack-name prod-portfolio-storage \
             --query 'Stacks[0].Outputs[?OutputKey==`DistributionId`].OutputValue' \
-            --output text)
-          echo "::set-output name=bucket::$BUCKET_NAME"
-          echo "::set-output name=distribution::$DIST_ID"
+            --output text --region ${{ env.AWS_REGION }})
 
-      # Upload static assets
-      - name: Upload Static Assets
+          echo "bucket=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "distribution=$DIST_ID" >> $GITHUB_OUTPUT
+
+      - name: Check if Stack Outputs were retrieved
+        if: steps.stack-outputs.outcome != 'success'
         run: |
-          aws s3 sync ./out s3://${{ steps.stack-outputs.outputs.bucket }} \
-            --delete \
-            --cache-control "public, max-age=31536000, immutable" \
-            --exclude "index.html" \
-            --exclude "*.json"
+          echo "Failed to retrieve stack outputs. Check your user permissions and make sure 'prod-portfolio-storage' stack exists."
+          exit 1
 
-      # Upload HTML and JSON with no-cache
-      - name: Upload Dynamic Files
+      # Upload the exported static files to your S3 bucket
+      - name: Upload to S3
         run: |
-          aws s3 sync ./out s3://${{ steps.stack-outputs.outputs.bucket }} \
-            --delete \
-            --cache-control "public, max-age=0, must-revalidate" \
-            --include "index.html" \
-            --include "*.json"
+          echo "Uploading static files to s3://${{ steps.stack-outputs.outputs.bucket }}"
+          aws s3 sync out/ s3://${{ steps.stack-outputs.outputs.bucket }} --delete
 
-      # Invalidate CloudFront cache
+      # Invalidate CloudFront cache so your changes go live
       - name: Invalidate CloudFront
         run: |
           aws cloudfront create-invalidation \
             --distribution-id ${{ steps.stack-outputs.outputs.distribution }} \
             --paths "/*"
 
-      # Verify deployment
+      # Verify the site is live at your real domain
       - name: Verify Deployment
         run: |
-          # Wait for CloudFront invalidation
-          sleep 30
-
-          # Check if website is accessible
-          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}" ${{ env.NEXT_PUBLIC_BASE_URL }})
+          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}" https://bjornmelin.io)
           if [ "$HTTP_CODE" != "200" ]; then
-            echo "Website verification failed with HTTP code: $HTTP_CODE"
+            echo "Website verification failed at https://bjornmelin.io with HTTP code: $HTTP_CODE"
             exit 1
           fi
+          echo "Deployment verified. Received HTTP 200 from https://bjornmelin.io"

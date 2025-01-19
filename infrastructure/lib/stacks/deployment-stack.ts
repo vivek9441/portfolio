@@ -43,6 +43,9 @@ export class DeploymentStack extends cdk.Stack {
       actions: ["cloudformation:DescribeStacks"],
       resources: [
         `arn:aws:cloudformation:${this.region}:${this.account}:stack/${this.stackName}/*`,
+        `arn:aws:cloudformation:${this.region}:${this.account}:stack/prod-portfolio-storage/*`,
+        `arn:aws:cloudformation:${this.region}:${this.account}:stack/prod-portfolio-dns/*`,
+        `arn:aws:cloudformation:${this.region}:${this.account}:stack/prod-portfolio-monitoring/*`,
       ],
     });
 
