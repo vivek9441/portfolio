@@ -165,8 +165,26 @@ export class EmailStack extends cdk.Stack {
     const contact = this.api.root.addResource("contact");
     contact.addMethod(
       "POST",
-      new apigateway.LambdaIntegration(this.emailFunction)
+      new apigateway.LambdaIntegration(this.emailFunction),
+      {
+        authorizationType: apigateway.AuthorizationType.NONE, // Allow unauthenticated access
+        apiKeyRequired: false,
+      }
     );
+
+    // Add CORS options to the API
+    const corsOptions: apigateway.CorsOptions = {
+      allowOrigins: [
+        `https://${props.domainName}`,
+        `https://www.${props.domainName}`,
+        process.env.ALLOWED_ORIGIN!,
+      ],
+      allowMethods: ['POST', 'OPTIONS'],
+      allowHeaders: ['Content-Type'],
+    };
+
+    // Apply CORS to the contact resource
+    contact.addCorsPreflight(corsOptions);
 
     // Create custom policy for SES permissions
     const sesPolicy = new iam.PolicyStatement({
