@@ -18,6 +18,7 @@ import { certifications } from "@/data/certifications";
 import { experiences, previousExperiences } from "@/data/experience";
 import { education } from "@/data/education";
 import { hobbies } from "@/data/hobbies";
+import { skillCategories } from "@/data/skills";
 
 export function AboutDetail() {
   return (
@@ -102,6 +103,43 @@ export function AboutDetail() {
               </p>
             </div>
           </Card>
+        </motion.div>
+
+        {/* Skills Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mb-20"
+        >
+          <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
+            <Code className="w-8 h-8 text-primary" />
+            Skills & Expertise
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {skillCategories.map((category) => (
+              <Card
+                key={category.name}
+                className="p-6 backdrop-blur-xl bg-card/50 border-primary/10"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <category.Icon className={`w-6 h-6 ${category.color}`} />
+                  <h3 className="text-xl font-semibold">{category.name}</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {category.skills.map((skill) => (
+                    <Badge
+                      key={skill}
+                      variant="outline"
+                      className={`${category.color}`}
+                    >
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </Card>
+            ))}
+          </div>
         </motion.div>
 
         {/* Work Experience - Most important for recruiters */}
