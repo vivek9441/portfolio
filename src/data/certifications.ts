@@ -16,6 +16,20 @@ export interface Certification {
 
 export const certifications: Certification[] = [
   {
+    name: "Supervised Machine Learning: Regression and Classification",
+    image: "/certifications/deep-learning-ai.png",
+    link: "https://www.coursera.org/account/accomplishments/verify/ZFRMPTT4LRYP",
+    issuedBy: "Stanford University & DeepLearning.AI",
+    issuedDate: "January 25th, 2025",
+  },
+  {
+    name: "Generative AI Fundamentals Accreditation",
+    image: "/certifications/databricks-genai-fund.png",
+    link: "https://www.credential.net/401e9f8b-77b3-4580-a533-d2d892f6b117#acc.OHQbpY3s",
+    issuedBy: "Databricks",
+    issuedDate: "January 24th, 2025",
+  },
+  {
     name: "AWS Machine Learning Engineer Associate",
     image: "/certifications/aws-mle.png",
     link: "https://www.credly.com/badges/5e5045a6-689d-4939-9ab4-9216b2642801/public_url",
