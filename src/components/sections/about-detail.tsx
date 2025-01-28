@@ -18,6 +18,7 @@ import { certifications } from "@/data/certifications";
 import { experiences, previousExperiences } from "@/data/experience";
 import { education } from "@/data/education";
 import { hobbies } from "@/data/hobbies";
+import { skillCategories } from "@/data/skills";
 
 export function AboutDetail() {
   return (
@@ -81,26 +82,64 @@ export function AboutDetail() {
             </h2>
             <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
               <p>
-                As a Senior Data Scientist at 3M Corporate Research Analytical Laboratory, I specialize in cloud solutions architecture, 
-                developing scalable, cost-effective AWS infrastructures to solve complex analytical challenges. Based in Salt Lake City, 
-                I bring expertise in AI/ML, generative AI, and data-driven cloud environments, with a track record of transforming 
+                AI Engineer and Machine Learning Engineer based in Salt Lake City, specializing in deep learning, generative AI,
+                and LLM applications. With a proven track record of delivering multi-million-dollar solutions, I bring 
+                expertise in building scalable, cost-effective systems on AWS and transforming
                 operations through efficient, reliable, and strategically designed solutions.
               </p>
               <p>
-                My recent achievements include leading CRAL&apos;s infrastructure migration to AWS, resulting in 60% cost reduction, 
-                and establishing scalable frameworks supporting diverse teams across 3M. I&apos;ve developed custom Python packages, 
-                reusable IaC libraries, and modernized CI/CD pipelines, consistently delivering 50%+ improvements in performance 
-                and deployment efficiency.
+                My recent achievements include leading a high-profile neuro-symbolic AI project that reduced training data needs
+                by 40% and solved complex material science challenges. I successfully migrated 3M&apos;s Corporate Research Analytical
+                Lab&apos;s infrastructure to AWS, cutting cloud costs by 60% and establishing scalable frameworks for manufacturing
+                and divisional teams. I&apos;ve developed custom Python packages, reusable IaC libraries, and modernized CI/CD pipelines,
+                consistently delivering 50%+ improvements in performance and deployment efficiency.
               </p>
               <p>
-                With a strong foundation in Computer Science and Mathematics from Augsburg University and six AWS certifications, 
-                I&apos;ve evolved from software engineering to become a leader in cloud architecture and data science. I&apos;m passionate 
-                about advancing cloud-based technologies and architecting solutions that enable operational agility and innovation. 
-                Outside of tech, I&apos;m an avid freestyle skier and outdoor enthusiast, bringing the same dedication to precision 
-                and continuous improvement from the slopes to my professional work.
+                With multiple AWS certifications and a strong foundation in Mathematics and Computer Science from Augsburg University,
+                I&apos;ve evolved from software engineering to become a leader in cloud architecture and data science. I&apos;m passionate
+                about advancing AI technologies and developing solutions that enable operational excellence and innovation. Outside of tech,
+                I&apos;m an avid freestyle skier and outdoor enthusiast, bringing the same dedication to precision and continuous
+                improvement from the slopes to my professional work.
               </p>
             </div>
           </Card>
+        </motion.div>
+
+        {/* Skills Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mb-20"
+        >
+          <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
+            <Code className="w-8 h-8 text-primary" />
+            Skills & Expertise
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {skillCategories.map((category) => (
+              <Card
+                key={category.name}
+                className="p-6 backdrop-blur-xl bg-card/50 border-primary/10"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <category.Icon className={`w-6 h-6 ${category.color}`} />
+                  <h3 className="text-xl font-semibold">{category.name}</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {category.skills.map((skill) => (
+                    <Badge
+                      key={skill}
+                      variant="outline"
+                      className={`${category.color}`}
+                    >
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </Card>
+            ))}
+          </div>
         </motion.div>
 
         {/* Work Experience - Most important for recruiters */}
@@ -127,9 +166,12 @@ export function AboutDetail() {
                   </div>
                   <p className="text-sm text-muted-foreground">{exp.startDate} - {exp.endDate}</p>
                 </div>
-                <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                <ul className="space-y-2 text-muted-foreground ml-4">
                   {exp.achievements.map((achievement, index) => (
-                    <li key={index}>{achievement.text}</li>
+                    <li key={index} className="flex">
+                      <span className="mr-2">•</span>
+                      <span className="flex-1">{achievement.text}</span>
+                    </li>
                   ))}
                 </ul>
                 {exp.skills.length > 0 && (
