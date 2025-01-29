@@ -1,138 +1,258 @@
 # Coding Standards
 
-## Code Style
+## TypeScript
 
-### TypeScript
+### Type Safety
 
 ```typescript
 // Use explicit types
-interface User {
-  id: string;
+interface ContactForm {
   name: string;
   email: string;
+  message: string;
 }
 
-// Use functional components
-const UserProfile: React.FC<UserProps> = ({ user }) => {
-  return (
-    <div>
-      <h1>{user.name}</h1>
-      <p>{user.email}</p>
-    </div>
-  );
-};
+// Use type inference when possible
+const [isLoading, setIsLoading] = useState(false);
+
+// Use proper return types
+async function sendEmail(data: ContactForm): Promise<{ success: boolean }> {
+  // Implementation
+}
 ```
 
-### React
+### Type Organization
 
-- Use functional components
-- Implement proper error boundaries
-- Follow React hooks rules
-- Maintain component purity
+```typescript
+// Place types in dedicated files
+// src/types/project.ts
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  link?: string;
+  github?: string;
+  tags: string[];
+}
 
-### File Organization
+// Use type imports
+import type { Project } from "@/types/project";
+```
+
+## Next.js Components
+
+### Server Components (Default)
+
+```typescript
+// app/projects/page.tsx
+import { ProjectGrid } from "@/components/projects/project-grid";
+
+export default async function ProjectsPage() {
+  return (
+    <main className="container py-8">
+      <ProjectGrid />
+    </main>
+  );
+}
+```
+
+### Client Components
+
+```typescript
+// Add 'use client' directive at the top
+"use client";
+
+// components/contact/contact-form.tsx
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+
+export function ContactForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Implementation
+}
+```
+
+## File Structure
 
 ```
 feature/
 ├── components/     # Feature-specific components
-├── hooks/         # Custom hooks
-├── utils/         # Utility functions
-├── types/         # TypeScript types
-└── tests/         # Test files
+│   ├── server/    # Server components
+│   └── client/    # Client components
+├── lib/           # Feature-specific utilities
+└── types/         # Feature-specific types
+```
+
+## Tailwind CSS
+
+### Class Organization
+
+```typescript
+// Organized by purpose
+<div
+  className={cn(
+    // Layout
+    "flex flex-col gap-4",
+    // Spacing
+    "p-4 my-2",
+    // Colors
+    "bg-background text-foreground",
+    // States
+    "hover:bg-accent focus:ring-2",
+    // Responsive
+    "md:flex-row lg:p-6"
+  )}
+>
+```
+
+### Component Patterns
+
+```typescript
+// Use cn utility for conditional classes
+import { cn } from "@/lib/utils";
+
+interface ButtonProps {
+  variant?: "default" | "outline";
+  className?: string;
+}
+
+export function Button({ variant = "default", className }: ButtonProps) {
+  return (
+    <button
+      className={cn(
+        "base-styles",
+        variant === "outline" && "outline-styles",
+        className
+      )}
+    />
+  );
+}
+```
+
+## API Routes
+
+### Route Handlers
+
+```typescript
+// app/api/contact/route.ts
+import { NextResponse } from "next/server";
+import { contactSchema } from "@/lib/schemas/contact";
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const validatedData = contactSchema.parse(body);
+    // Implementation
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+}
+```
+
+## Error Handling
+
+### API Errors
+
+```typescript
+// lib/utils/error-handler.ts
+export function handleApiError(error: unknown) {
+  if (error instanceof ZodError) {
+    return { error: "Validation error", status: 400 };
+  }
+  // Other error types
+}
+```
+
+### Client-side Errors
+
+```typescript
+"use client";
+
+import { ErrorBoundary } from "@/components/shared/error-boundary";
+
+export function ClientComponent() {
+  return (
+    <ErrorBoundary fallback={<ErrorMessage />}>
+      {/* Component content */}
+    </ErrorBoundary>
+  );
+}
+```
+
+## Documentation
+
+### Component Documentation
+
+```typescript
+/**
+ * ProjectCard component displays a project with its details
+ *
+ * @param {Project} project - Project data to display
+ * @param {string} className - Optional additional classes
+ * @returns {JSX.Element} Project card component
+ */
+export function ProjectCard({ project, className }: ProjectCardProps) {
+  // Implementation
+}
+```
+
+### Type Documentation
+
+```typescript
+/**
+ * Represents project data structure
+ */
+export interface Project {
+  /** Unique identifier */
+  id: string;
+  /** Project title */
+  title: string;
+  /** Project description */
+  description: string;
+  // ... other fields
+}
 ```
 
 ## Best Practices
 
-### General
+### Performance
 
-- DRY (Don't Repeat Yourself)
-- SOLID principles
-- Clean Code principles
-- Proper error handling
+- Use Server Components by default
+- Implement proper loading states
+- Optimize images using next/image
+- Minimize client-side JavaScript
 
-### TypeScript
+### Security
 
-- Enable strict mode
-- Use proper types
-- Avoid `any`
-- Document complex types
+- Validate all inputs
+- Sanitize outputs
+- Use proper CORS settings
+- Implement rate limiting
 
-### React
+### Accessibility
 
-- Proper prop types
-- Memoization when needed
-- Controlled components
-- Performance optimization
+- Use semantic HTML
+- Include ARIA labels
+- Ensure keyboard navigation
+- Maintain proper contrast
 
-## Documentation
+### State Management
 
-### Code Comments
+- Use Server Components when possible
+- Keep state close to where it's used
+- Implement proper loading states
+- Handle errors gracefully
 
-```typescript
-/**
- * Component description
- * @param props - Component props
- * @returns JSX element
- */
-```
-
-### README Files
-
-- Component usage
-- Props documentation
-- Examples
-- Dependencies
-
-## Testing
-
-### Unit Tests
-
-```typescript
-describe("Component", () => {
-  it("should render correctly", () => {
-    // Test implementation
-  });
-});
-```
-
-### Integration Tests
-
-- Component integration
-- API integration
-- State management
-
-## Version Control
-
-### Git Commits
+## Git Commit Standards
 
 ```bash
 # Format: <type>(<scope>): <description>
-feat(auth): add social login
-fix(api): resolve rate limiting issue
-docs(readme): update installation steps
+feat(contact): add email validation
+fix(projects): resolve image loading issue
+docs(readme): update setup instructions
+style(ui): improve button styling
 ```
 
-### Branch Naming
-
-```bash
-feature/feature-name
-bugfix/issue-description
-hotfix/urgent-fix
-release/version
-```
-
-## Security
-
-### Code Security
-
-- Input validation
-- Output sanitization
-- Security headers
-- Authentication checks
-
-### Data Handling
-
-- Proper encryption
-- Secure storage
-- Data validation
-- Error handling
+For more specific examples and patterns, refer to the codebase and component documentation.
