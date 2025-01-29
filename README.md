@@ -340,6 +340,7 @@ If you use this project in your research or work, please cite it as:
 ```
 
 Standard Citation:
+
 ```
 Melin, B. (2024). bjornmelin-platform-io: Cloud-Native Portfolio Platform [Computer software]. GitHub. https://github.com/bjornmelin/bjornmelin-platform-io
 ```
