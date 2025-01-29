@@ -1,105 +1,113 @@
 # Data Schemas
 
-This section provides the data schemas used in the API. All data validation is performed using Zod.
+This document outlines the data schemas used throughout the application.
 
-## User Schema
+## API Schemas
+
+### Contact Form Schema
+
+Located in `src/lib/schemas/contact.ts`:
 
 ```typescript
-interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  createdAt: string;
-  updatedAt: string;
-  role: "user" | "admin";
-  status: "active" | "inactive" | "pending";
+// Contact form request validation schema
+{
+  name: string; // Required, sender's name
+  email: string; // Required, valid email format
+  message: string; // Required, message content
 }
 ```
 
-## Portfolio Schema
+## Data Models
+
+### Project Type
+
+Located in `src/types/project.ts`:
 
 ```typescript
-interface PortfolioItem {
+interface Project {
   id: string;
   title: string;
   description: string;
-  category: string;
+  image: string;
+  link?: string;
+  github?: string;
+  tags: string[];
+}
+```
+
+## Static Data Types
+
+Located in `src/data/`:
+
+### Certifications
+
+```typescript
+interface Certification {
+  title: string;
+  issuer: string;
+  date: string;
+  image: string;
+}
+```
+
+### Experience
+
+```typescript
+interface Experience {
+  title: string;
+  company: string;
+  location: string;
+  startDate: string;
+  endDate?: string;
+  description: string[];
   technologies: string[];
-  images: {
-    url: string;
-    alt: string;
-  }[];
-  links: {
-    github?: string;
-    live?: string;
-    demo?: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
 }
 ```
 
-## Authentication Schemas
-
-### Login Request
+### Education
 
 ```typescript
-interface LoginRequest {
-  email: string;
-  password: string;
+interface Education {
+  school: string;
+  degree: string;
+  field: string;
+  graduationDate: string;
 }
 ```
 
-### Registration Request
+### Skills
 
 ```typescript
-interface RegistrationRequest {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
+interface Skill {
+  category: string;
+  items: string[];
 }
 ```
 
-### Token Response
+## Validation
+
+All schemas use Zod for runtime type checking and validation. Example:
 
 ```typescript
-interface TokenResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  tokenType: "Bearer";
-}
+import { z } from "zod";
+
+export const contactSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  message: z.string().min(10, "Message must be at least 10 characters"),
+});
 ```
 
-## Error Schema
+## Environment Variables
+
+Type-safe environment variables are defined in `src/env.mjs`:
 
 ```typescript
-interface APIError {
-  error: {
-    code: string;
-    message: string;
-    details?: Record<string, any>;
-  };
+// Environment variable schema
+{
+  AWS_REGION: string;
+  AWS_ACCESS_KEY_ID: string;
+  AWS_SECRET_ACCESS_KEY: string;
+  // ... other environment variables
 }
 ```
-
-## Validation Rules
-
-All schemas are validated using Zod with the following rules:
-
-### User
-
-- Email: Valid email format
-- Password: Min 8 chars, 1 uppercase, 1 number
-- Names: 2-50 chars, letters only
-
-### Portfolio
-
-- Title: 3-100 chars
-- Description: Max 2000 chars
-- Category: Must match predefined list
-- URLs: Valid URL format
-- Images: Max 10 per item
