@@ -1,142 +1,99 @@
 # Backend Architecture
 
-## Overview
+The backend architecture is primarily serverless, utilizing Next.js API routes and AWS services.
 
-The backend architecture follows a serverless-first approach using AWS services, implementing a microservices pattern for scalability and maintainability.
+## API Routes
 
-## Core Components
+Located in `src/app/api/`:
 
-### API Layer
-
-#### API Gateway
-
-- RESTful API endpoints
-- tRPC integration
-- Request validation
-- Rate limiting
-- API key management
-
-#### Lambda Functions
-
-- Edge computing capability
-- Event-driven processing
-- VPC integration
-- Custom runtimes
-
-### Authentication Service
-
-#### Cognito Integration
-
-- User management
-- Social login providers
-- JWT token handling
-- MFA support
-- Password policies
-
-### Data Layer
-
-#### DynamoDB
-
-- Global tables
-- Auto-scaling
-- Backup/restore
-- Stream processing
-- Secondary indexes
-
-### Security
-
-#### Secrets Management
-
-- Rotation policies
-- Encryption
-- Access control
-- Audit logging
-
-## Service Architecture
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant API as API Gateway
-    participant Auth as Cognito
-    participant Lambda
-    participant DB as DynamoDB
-
-    Client->>API: HTTP Request
-    API->>Auth: Validate Token
-    Auth-->>API: Token Valid
-    API->>Lambda: Execute Function
-    Lambda->>DB: Query Data
-    DB-->>Lambda: Return Data
-    Lambda-->>API: Response
-    API-->>Client: HTTP Response
+```
+api/
+└── contact/
+    └── route.ts    # Contact form endpoint
 ```
 
-## Error Handling
+## Services
 
-- Global error middleware
-- Custom error types
-- Error logging
-- Client-friendly messages
+### Email Service
+
+- Implementation: `src/lib/services/email.ts`
+- Uses AWS SES for email delivery
+- Handles contact form submissions
+
+### Error Handling
+
+- Centralized error handling in `src/lib/utils/error-handler.ts`
+- Consistent error responses across API endpoints
+
+## Data Validation
+
+### Schema Validation
+
+- Located in `src/lib/schemas/`
+- Uses Zod for runtime type checking
+- Validates incoming API requests
+
+Example contact form schema:
+
+```typescript
+contact.ts:
+- name validation
+- email format validation
+- message length requirements
+```
+
+## AWS Integration
+
+### SES Configuration
+
+- Email sending capabilities
+- Managed through AWS CDK
+- Environment-specific settings
+
+### Infrastructure
+
+- Serverless architecture
+- CDK for infrastructure management
+- Environment isolation
+
+## Security
+
+### Request Validation
+
+- Input sanitization
+- Rate limiting
+- CORS configuration
+
+### Environment Variables
+
+- Secure configuration management
+- Environment-specific settings
+- Type-safe through `env.mjs`
 
 ## Monitoring
 
-- CloudWatch metrics
-- X-Ray tracing
-- Custom dashboards
-- Alerting
+### Error Tracking
 
-## Authentication Flow
+- Error logging
+- AWS CloudWatch integration
+- Performance monitoring
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant CF as CloudFront
-    participant Cognito
-    participant API as API Gateway
-    participant Lambda
+### Logging
 
-    User->>CF: Access Application
-    CF->>Cognito: Authenticate
-    Cognito-->>User: JWT Token
-    User->>API: Request + JWT
-    API->>Lambda: Validated Request
-    Lambda-->>User: Protected Resource
-```
+- Structured logging format
+- Environment-based log levels
+- AWS CloudWatch logs
 
-## Secrets Access Pattern
+## Development
 
-```mermaid
-sequenceDiagram
-    participant App
-    participant SM as Secrets Manager
-    participant KMS
-    participant IAM
+### Local Development
 
-    App->>IAM: Request Access
-    IAM-->>App: Grant Token
-    App->>SM: GetSecretValue
-    SM->>KMS: Decrypt
-    KMS-->>SM: Decrypted Value
-    SM-->>App: Secret Value
-```
+- Environment setup instructions in `development/getting-started.md`
+- Local AWS credential configuration
+- Environment variable management
 
-## Design Decisions
+### Testing
 
-### Edge Computing
-
-- **Why**: Improved latency and global performance
-- **Implementation**: CloudFront + Lambda@Edge
-- **Benefits**:
-  - Reduced latency
-  - Global availability
-  - Cost optimization
-
-### Serverless Architecture
-
-- **Why**: Scalability and cost efficiency
-- **Implementation**: Lambda + DynamoDB
-- **Benefits**:
-  - Auto-scaling
-  - Pay-per-use
-  - Reduced maintenance
+- API endpoint testing
+- Service unit tests
+- Infrastructure testing through CDK
