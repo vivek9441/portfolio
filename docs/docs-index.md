@@ -8,7 +8,6 @@ Welcome to the bjornmelin-platform-io documentation. This documentation is organ
 - [`/development`](./development/README.md) - Development guides and practices
 - [`/deployment`](./deployment/README.md) - Deployment and CI/CD processes
 - [`/api`](./api/README.md) - API documentation and usage guides
-- [`/security`](./security/README.md) - Security practices and configurations
 
 ## 📁 Directory Structure
 
@@ -17,8 +16,7 @@ docs/
 ├── architecture/
 │   ├── README.md              # Architecture overview
 │   ├── aws-services.md        # AWS services documentation
-│   ├── frontend.md            # Frontend architecture
-│   ├── backend.md             # Backend architecture
+│   ├── frontend.md            # Frontend architecture (Next.js)
 │   └── infrastructure.md      # Infrastructure design
 │
 ├── development/
@@ -35,15 +33,8 @@ docs/
 │
 ├── api/
 │   ├── README.md              # API overview
-│   ├── authentication.md      # Auth endpoints
-│   ├── portfolio.md           # Portfolio endpoints
+│   ├── contact.md             # Contact form endpoints
 │   └── schemas.md            # Data schemas
-│
-├── security/
-│   ├── README.md              # Security overview
-│   ├── auth-flow.md          # Authentication flows
-│   ├── secrets.md            # Secrets management
-│   └── compliance.md         # Security compliance
 │
 └── README.md                 # This documentation index
 ```
@@ -54,8 +45,7 @@ For new developers, we recommend following these documentation sections in order
 
 1. [Development Getting Started](./development/getting-started.md)
 2. [Architecture Overview](./architecture/README.md)
-3. [Security Practices](./security/README.md)
-4. [API Documentation](./api/README.md)
+3. [API Documentation](./api/README.md)
 
 ## 📖 Documentation Updates
 
@@ -71,4 +61,3 @@ This documentation is maintained alongside the codebase. When making changes:
 - [AWS Services Overview](./architecture/aws-services.md)
 - [Development Environment Setup](./development/getting-started.md)
 - [Deployment Process](./deployment/ci-cd.md)
-- [Security Best Practices](./security/README.md)

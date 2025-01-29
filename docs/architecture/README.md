@@ -6,7 +6,6 @@
 - [Core Components](#core-components)
 - [AWS Services](#aws-services)
 - [Design Decisions](#design-decisions)
-- [Security Architecture](#security-architecture)
 
 ## System Architecture
 
@@ -14,238 +13,145 @@
 
 ```mermaid
 graph TB
-    subgraph "Global Edge Network"
-        CF[CloudFront Distribution]
-        WAF[AWS WAF]
-    end
-
     subgraph "Frontend Layer"
+        NEXT[Next.js App]
+    end
+
+    subgraph "AWS Services"
+        SES[AWS SES]
         S3[S3 Bucket]
-        CF --> S3
-        WAF --> CF
+        CDK[AWS CDK]
     end
 
-    subgraph "Authentication Layer"
-        COGNITO[Cognito User Pools]
-        SECRETS1[Secrets Manager]
-    end
-
-    subgraph "API Layer"
-        APIGW[API Gateway]
-        LAMBDA[Lambda Functions]
-        SECRETS2[Secrets Manager]
-    end
-
-    subgraph "Data Layer"
-        DYNAMODB[DynamoDB Tables]
-        SECRETS3[Secrets Manager]
-    end
-
-    CF --> APIGW
-    APIGW --> LAMBDA
-    LAMBDA --> DYNAMODB
-    LAMBDA --> SECRETS2
-    COGNITO --> SECRETS1
-    LAMBDA --> SECRETS3
+    NEXT --> SES
+    NEXT --> S3
 ```
 
-### Network Architecture
+### Infrastructure Architecture
 
 ```mermaid
 graph LR
-    subgraph "VPC Architecture"
-        subgraph "Public Subnets"
-            ALB[Application Load Balancer]
-        end
-
-        subgraph "Private Subnets"
-            ECS[ECS Services]
-            LAMBDA[Lambda Functions]
-        end
-
-        subgraph "Isolated Subnets"
-            DB[DynamoDB Endpoint]
-        end
+    subgraph "CDK Stacks"
+        DNS[DNS Stack]
+        EMAIL[Email Stack]
+        MONITOR[Monitoring Stack]
+        STORAGE[Storage Stack]
+        DEPLOY[Deployment Stack]
     end
 
-    INTERNET[Internet] --> ALB
-    ALB --> ECS
-    ECS --> DB
-    LAMBDA --> DB
+    DNS --> EMAIL
+    EMAIL --> MONITOR
+    MONITOR --> STORAGE
+    STORAGE --> DEPLOY
 ```
 
 ## Core Components
 
-### Frontend (Next.js 15)
+### Frontend (Next.js 13+)
 
-- **Technology**: React 19 RC with Next.js 15
-- **Hosting**: S3 + CloudFront
+- **Technology**: React with Next.js 13+ App Router
 - **Features**:
   - Server Components
-  - Edge Runtime
+  - App Router
   - Static Site Generation
-  - Dynamic Rendering
+  - API Routes
 
 ### API Layer
 
-- **Design**: RESTful + tRPC
-- **Implementation**: Lambda + API Gateway
+- **Design**: Next.js API Routes
+- **Implementation**: Serverless Functions
 - **Features**:
   - Type-safe APIs
-  - Edge Functions
   - Request Validation
-  - Rate Limiting
+  - Error Handling
+  - Contact Form Endpoint
 
-### Authentication
+### Email Service
 
-- **Provider**: AWS Cognito
+- **Provider**: AWS SES
 - **Features**:
-  - Social Login
-  - JWT Tokens
-  - MFA Support
-  - Session Management
+  - Contact Form Processing
+  - Email Templates
+  - Error Handling
+  - Delivery Monitoring
 
-### Data Storage
+### Static Assets
 
-- **Primary**: DynamoDB
+- **Storage**: S3
 - **Features**:
-  - Global Tables
-  - Auto-scaling
-  - Point-in-time Recovery
-  - Encryption at Rest
+  - Project Images
+  - Public Assets
+  - Certifications
+  - Profile Images
 
 ## AWS Services
 
-### Compute Services
+### Email Service (SES)
 
 ```yaml
-Lambda:
+SES:
   Use Cases:
-    - API Endpoints
-    - Background Jobs
-    - Event Processing
+    - Contact Form Emails
   Features:
-    - Edge Computing
-    - Event Triggers
-    - VPC Integration
-
-ECS:
-  Use Cases:
-    - Long-running Services
-    - Background Workers
-  Features:
-    - Fargate Runtime
-    - Auto-scaling
-    - Load Balancing
+    - Email Templates
+    - Delivery Monitoring
+    - Error Handling
 ```
 
-### Storage Services
+### Storage Service (S3)
 
 ```yaml
 S3:
   Use Cases:
     - Static Assets
-    - User Uploads
-    - Website Hosting
+    - Public Files
   Features:
     - Versioning
     - Lifecycle Policies
-    - CDN Integration
-
-DynamoDB:
-  Use Cases:
-    - User Data
-    - Application State
-    - Session Management
-  Features:
-    - Global Tables
-    - Streams
-    - Backup/Restore
 ```
 
-### Security Services
+### Infrastructure (CDK)
 
 ```yaml
-Cognito:
-  Features:
-    - User Management
-    - Identity Federation
-    - OAuth 2.0 Flows
-    - Token Management
-
-Secrets Manager:
-  Features:
-    - Secret Rotation
-    - Fine-grained Access
-    - Encryption
-    - Audit Logging
+CDK Stacks:
+  - DNS Stack
+  - Email Stack
+  - Monitoring Stack
+  - Storage Stack
+  - Deployment Stack
 ```
 
 ## Design Decisions
 
-### Edge Computing
+### Next.js App Router
 
-- **Why**: Improved latency and global performance
-- **Implementation**: CloudFront + Lambda@Edge
+- **Why**: Modern React features and improved performance
+- **Implementation**: Server Components and App Directory
 - **Benefits**:
-  - Reduced latency
-  - Global availability
-  - Cost optimization
+  - Improved performance
+  - Better SEO
+  - Type safety
+  - Server-side rendering
 
 ### Serverless Architecture
 
-- **Why**: Scalability and cost efficiency
-- **Implementation**: Lambda + DynamoDB
+- **Why**: Simplicity and cost efficiency
+- **Implementation**: Next.js API Routes + AWS Services
 - **Benefits**:
-  - Auto-scaling
-  - Pay-per-use
-  - Reduced maintenance
+  - Low maintenance
+  - Cost effective
+  - Easy scaling
+  - Simple deployment
 
-### Security First
+### Infrastructure as Code
 
-- **Why**: Enterprise-grade security
-- **Implementation**: Zero-trust architecture
-- **Features**:
-  - Secrets rotation
-  - Encryption at rest
-  - Fine-grained access control
-
-## Security Architecture
-
-### Authentication Flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant CF as CloudFront
-    participant Cognito
-    participant API as API Gateway
-    participant Lambda
-
-    User->>CF: Access Application
-    CF->>Cognito: Authenticate
-    Cognito-->>User: JWT Token
-    User->>API: Request + JWT
-    API->>Lambda: Validated Request
-    Lambda-->>User: Protected Resource
-```
-
-### Secrets Management
-
-```mermaid
-sequenceDiagram
-    participant App
-    participant SM as Secrets Manager
-    participant KMS
-    participant IAM
-
-    App->>IAM: Request Access
-    IAM-->>App: Grant Token
-    App->>SM: GetSecretValue
-    SM->>KMS: Decrypt
-    KMS-->>SM: Decrypted Value
-    SM-->>App: Secret Value
-```
+- **Why**: Reproducible and version-controlled infrastructure
+- **Implementation**: AWS CDK
+- **Benefits**:
+  - Version control
+  - Type safety
+  - Easy updates
+  - Documentation
 
 For more detailed information about specific components, please refer to:
 

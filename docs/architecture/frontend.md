@@ -1,134 +1,96 @@
 # Frontend Architecture
 
-## Technology Stack
+The frontend is built with Next.js 13+ using the App Router and React Server Components.
 
-### Core Framework
-
-- React 19 RC
-- Next.js 15
-- TypeScript 5.4
-
-### UI Layer
-
-- Tailwind CSS
-- shadcn/ui
-- Framer Motion
-
-### Data Management
-
-- TanStack Query
-- tRPC Client
-- Zod validation
-
-## Key Features
-
-### React 19 RC Features
-
-- Document Metadata API
-- Asset Loading API
-- Progressive Loading
-- Optimization Compiler
-
-### Next.js 15 Capabilities
-
-- Server Components
-- Partial Prerendering
-- Parallel Routes
-- Edge Runtime
-
-### Performance Optimizations
-
-- Edge deployment
-- Streaming SSR
-- Smart bundling
-- Optimal caching
-
-## Architecture Patterns
-
-### Component Structure
+## Project Structure
 
 ```
-components/
-├── ui/               # Base UI components
-├── features/         # Feature-specific components
-├── layouts/          # Layout components
-└── shared/           # Shared components
+src/
+├── app/                    # Next.js 13+ App Router pages
+│   ├── about/             # About page
+│   ├── api/               # API routes
+│   ├── contact/           # Contact page
+│   ├── projects/         # Projects page
+│   └── page.tsx          # Home page
+├── components/            # React components
+│   ├── contact/          # Contact form components
+│   ├── layout/           # Layout components (navbar, footer)
+│   ├── projects/         # Project-related components
+│   ├── sections/         # Page sections
+│   ├── shared/           # Shared components
+│   ├── theme/            # Theme components
+│   └── ui/               # UI component library
+├── data/                 # Static data files
+├── hooks/                # Custom React hooks
+├── lib/                  # Utility functions and services
+└── types/                # TypeScript type definitions
 ```
 
-### State Management
+## Key Technologies
 
-- Server state with TanStack Query
-- Form state with React Hook Form
-- UI state with React Context
-- Validation with Zod
+- **Next.js 13+**: React framework with App Router and Server Components
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first CSS framework
+- **shadcn/ui**: UI component library
+- **React Server Components**: For improved performance and SEO
 
-### Routing
+## Components
 
-- App Router
-- Dynamic routes
-- Middleware
-- Loading states
+### Layout Components
 
-## Deployment
+- `Navbar`: Site navigation
+- `Footer`: Site footer
+- `ThemeProvider`: Dark/light theme management
 
-### Build Process
+### Page Sections
 
-- Static site generation
-- Dynamic paths
-- Image optimization
-- Font optimization
+- `Hero`: Homepage hero section
+- `About`: About section with personal details
+- `FeaturedProjects`: Project showcase
+- `ContactForm`: Contact form with validation
 
-### CDN Integration
+### Shared Components
 
-- CloudFront distribution
-- Edge caching
-- Asset optimization
-- Global deployment
+- `SectionHeader`: Consistent section headers
+- `TechBadge`: Technology tag display
+- `ErrorBoundary`: Error handling wrapper
 
-## Frontend Layer Architecture
+## Data Management
 
-```mermaid
-graph TB
-    subgraph "Global Edge Network"
-        CF[CloudFront Distribution]
-        WAF[AWS WAF]
-    end
+- Static data stored in `/data` directory
+- TypeScript interfaces in `/types`
+- Environment variables managed through `env.mjs`
 
-    subgraph "Frontend Layer"
-        S3[S3 Bucket]
-        CF --> S3
-        WAF --> CF
-    end
-```
+## Styling
 
-## Security Features
+- Tailwind CSS for utility-first styling
+- Custom components using shadcn/ui
+- Dark/light theme support
+- Custom fonts (Geist)
 
-### Zero-Trust Architecture
+## Performance Optimization
 
-- JWT token validation
-- Request signing
-- API authentication
-- CORS policies
+- React Server Components for improved initial load
+- Image optimization with Next.js Image component
+- Font optimization with Next.js Font system
+- Static site generation where possible
 
-### Edge Security
+## SEO
 
-- WAF integration
-- DDoS protection
-- Rate limiting
-- Geo-restrictions
+- Metadata configuration in `src/lib/metadata.ts`
+- Structured data for better search results
+- Dynamic sitemap generation
+- Robots.txt configuration
 
-## Design Decisions
+## Error Handling
 
-### Server Components
+- Custom error boundaries for component-level errors
+- Global error handling utilities
+- Toast notifications for user feedback
 
-- Improved performance
-- Reduced client bundle
-- Better SEO
-- Simplified data fetching
+## Development Practices
 
-### Edge Runtime
-
-- Global deployment
-- Reduced latency
-- Improved reliability
-- Cost optimization
+- Component-first architecture
+- Type-safe development with TypeScript
+- Consistent code formatting with ESLint
+- Modular and reusable component design

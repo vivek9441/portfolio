@@ -1,164 +1,62 @@
-# AWS Services Documentation
+# AWS Services
+
+This document outlines the AWS services used in the bjornmelin-platform-io platform.
 
 ## Core Services
 
-### Global Edge Network
+### AWS CDK
 
-- **CloudFront**
+Used for Infrastructure as Code (IaC) to define and provision AWS infrastructure. Our CDK stacks are organized in `infrastructure/lib/stacks/`:
 
-  - Global content delivery network
-  - Edge computing capabilities
-  - Integration with WAF
-  - Custom domain support
-  - SSL/TLS certificate management
+- **DNS Stack** (`dns-stack.ts`): Manages DNS configuration
+- **Email Stack** (`email-stack.ts`): Configures email services
+- **Monitoring Stack** (`monitoring-stack.ts`): Sets up monitoring and alerts
+- **Storage Stack** (`storage-stack.ts`): Manages storage resources
+- **Deployment Stack** (`deployment-stack.ts`): Handles deployment configuration
 
-- **WAF (Web Application Firewall)**
-  - DDoS protection
-  - SQL injection prevention
-  - Cross-site scripting (XSS) protection
-  - Rate limiting
-  - Geo-restriction capabilities
+### Simple Email Service (SES)
 
-### Compute Services
+- Used for sending contact form emails
+- Configuration managed through the Email Stack
+- Implementation in `src/lib/aws/ses.ts`
 
-#### Lambda
+## Infrastructure Organization
 
-- **Use Cases**
-  - API endpoints
-  - Background jobs
-  - Event processing
-  - Edge computing
-- **Features**
-  - Event-driven execution
-  - Multiple runtime support
-  - VPC integration
-  - Auto-scaling
-  - Pay-per-use pricing
+The infrastructure code is organized as follows:
 
-#### ECS (Elastic Container Service)
+```
+infrastructure/
+├── bin/
+│   └── app.ts                 # CDK app entry point
+├── lib/
+│   ├── constants.ts           # Shared constants
+│   ├── functions/             # Lambda functions
+│   │   └── contact-form/      # Contact form handler
+│   ├── stacks/               # CDK stack definitions
+│   └── types/                # TypeScript types
+└── cdk.json                  # CDK configuration
+```
 
-- **Use Cases**
-  - Long-running services
-  - Background workers
-  - Microservices
-- **Features**
-  - Fargate serverless runtime
-  - Auto-scaling
-  - Load balancing
-  - Container orchestration
-  - Service discovery
+## Environment Configuration
 
-### Storage Services
+Environment-specific configurations are managed through:
 
-#### S3 (Simple Storage Service)
+- `.env.production` - Production environment variables
+- `cdk.context.json` - CDK context values
+- Environment variables for AWS credentials and region
 
-- **Use Cases**
-  - Static website hosting
-  - Asset storage
-  - User uploads
-  - Data lake storage
-- **Features**
-  - Versioning
-  - Lifecycle policies
-  - CDN integration
-  - Server-side encryption
-  - Access control
+## Monitoring and Logging
 
-#### DynamoDB
+Monitoring is configured through the monitoring stack, which sets up:
 
-- **Use Cases**
-  - User data storage
-  - Session management
-  - Application state
-  - Real-time data
-- **Features**
-  - Global tables
-  - Auto-scaling
-  - Point-in-time recovery
-  - Streams
-  - Backup/restore
+- CloudWatch metrics and alarms
+- Log groups for application logs
+- Infrastructure health monitoring
 
-### Security Services
+## Security
 
-#### Cognito
+Infrastructure security is implemented through:
 
-- **Features**
-  - User pools
-  - Identity pools
-  - Social identity providers
-  - MFA support
-  - OAuth 2.0 flows
-  - Token management
-
-#### Secrets Manager
-
-- **Features**
-  - Secret rotation
-  - Fine-grained access control
-  - Encryption at rest
-  - Audit logging
-  - Version management
-
-### Developer Tools
-
-#### CodeBuild
-
-- CI/CD build processes
-- Multiple environment support
-- Custom build containers
-- Build caching
-
-#### CodePipeline
-
-- Deployment automation
-- Multi-stage pipelines
-- Source integration
-- Manual approval actions
-
-#### CloudWatch
-
-- Metrics and monitoring
-- Log aggregation
-- Alerting
-- Dashboards
-- Anomaly detection
-
-#### X-Ray
-
-- Distributed tracing
-- Service maps
-- Performance insights
-- Error tracking
-
-### Network Services
-
-#### Route53
-
-- **Features**
-  - DNS management
-  - Routing policies
-  - Health checks
-  - Domain registration
-  - Global DNS
-
-#### ACM (AWS Certificate Manager)
-
-- **Features**
-  - SSL/TLS certificate management
-  - Automatic renewal
-  - Integration with CloudFront
-  - Domain validation
-
-### Additional Storage Services
-
-#### EFS (Elastic File System)
-
-- **Use Cases**
-  - Container storage
-  - Shared file systems
-  - Persistent storage
-- **Features**
-  - Auto-scaling
-  - Multi-AZ access
-  - Encryption at rest
-  - Lifecycle management
+- IAM roles and policies defined in stack configurations
+- Resource access controls
+- Environment-based security groups

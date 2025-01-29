@@ -4,150 +4,211 @@
 
 ### Core Tools
 
-- Vitest
 - React Testing Library
-- Playwright
 - Jest
+- TypeScript
+- MSW (Mock Service Worker)
 
-### Test Types
+## Test Types
 
-1. Unit Tests
-2. Integration Tests
-3. E2E Tests
-4. Performance Tests
+### 1. Component Testing
 
-## Unit Testing
+- UI components
+- Server Components
+- Client Components
+- Custom Hooks
 
-### Component Testing
+### 2. API Testing
+
+- Next.js API Routes
+- External Services Integration
+- Error Handling
+
+### 3. Integration Testing
+
+- Page Flows
+- Form Submissions
+- Data Fetching
+
+## Component Testing
+
+### React Components
 
 ```typescript
 import { render, screen } from "@testing-library/react";
+import { Button } from "@/components/ui/button";
 
 describe("Button", () => {
-  it("renders correctly", () => {
+  it("renders with correct text", () => {
     render(<Button>Click me</Button>);
     expect(screen.getByText("Click me")).toBeInTheDocument();
+  });
+
+  it("handles click events", () => {
+    const onClick = jest.fn();
+    render(<Button onClick={onClick}>Click me</Button>);
+    screen.getByText("Click me").click();
+    expect(onClick).toHaveBeenCalled();
   });
 });
 ```
 
-### Utility Testing
+### Server Components
 
 ```typescript
-describe("formatDate", () => {
-  it("formats date correctly", () => {
-    expect(formatDate("2024-03-14")).toBe("March 14, 2024");
+import { Contact } from "@/app/contact/page";
+
+describe("Contact Page", () => {
+  it("renders contact form", () => {
+    render(<Contact />);
+    expect(screen.getByRole("form")).toBeInTheDocument();
+  });
+});
+```
+
+## API Testing
+
+### Contact Form API
+
+```typescript
+import { POST } from "@/app/api/contact/route";
+
+describe("Contact API", () => {
+  it("handles valid submission", async () => {
+    const response = await POST(
+      new Request("api/contact", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "Test User",
+          email: "test@example.com",
+          message: "Test message",
+        }),
+      })
+    );
+
+    expect(response.status).toBe(200);
+  });
+
+  it("validates input", async () => {
+    const response = await POST(
+      new Request("api/contact", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "",
+          email: "invalid",
+          message: "",
+        }),
+      })
+    );
+
+    expect(response.status).toBe(400);
   });
 });
 ```
 
 ## Integration Testing
 
-### API Integration
+### Form Submission Flow
 
 ```typescript
-describe("UserAPI", () => {
-  it("fetches user data", async () => {
-    const user = await fetchUser("123");
-    expect(user).toHaveProperty("id", "123");
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { ContactForm } from "@/components/contact/contact-form";
+
+describe("Contact Form Flow", () => {
+  it("submits form successfully", async () => {
+    render(<ContactForm />);
+
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Test User" },
+    });
+
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "test@example.com" },
+    });
+
+    fireEvent.change(screen.getByLabelText("Message"), {
+      target: { value: "Test message" },
+    });
+
+    fireEvent.click(screen.getByText("Send Message"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Message sent successfully")).toBeInTheDocument();
+    });
   });
 });
 ```
-
-### Component Integration
-
-- Complex interactions
-- State management
-- Side effects
-
-## E2E Testing
-
-### Playwright Tests
-
-```typescript
-test("user flow", async ({ page }) => {
-  await page.goto("/");
-  await page.click("text=Login");
-  await page.fill('input[name="email"]', "user@example.com");
-  await expect(page).toHaveURL("/dashboard");
-});
-```
-
-### Test Scenarios
-
-- User journeys
-- Critical paths
-- Error scenarios
-- Edge cases
-
-## Performance Testing
-
-### Metrics
-
-- Load time
-- Time to interactive
-- First contentful paint
-- Core Web Vitals
-
-### Tools
-
-- Lighthouse
-- WebPageTest
-- Chrome DevTools
-- Custom metrics
 
 ## Test Organization
 
 ### Directory Structure
 
 ```
-tests/
-├── unit/
-├── integration/
-├── e2e/
-└── performance/
+src/
+├── __tests__/
+│   ├── components/
+│   ├── api/
+│   └── integration/
+└── test-utils/
+    ├── setup.ts
+    └── helpers.ts
 ```
 
 ### Naming Conventions
 
-```
-ComponentName.test.ts
-feature.spec.ts
-api.integration.test.ts
-flow.e2e.test.ts
-```
-
-## CI/CD Integration
-
-### Pipeline Configuration
-
-```yaml
-test:
-  steps:
-    - unit-tests
-    - integration-tests
-    - e2e-tests
-    - performance-tests
-```
-
-### Test Environments
-
-- Development
-- Staging
-- Production
+- `ComponentName.test.tsx` - Component tests
+- `route.test.ts` - API route tests
+- `flow.test.tsx` - Integration tests
 
 ## Best Practices
 
-### Testing Principles
+### 1. Test Organization
 
-1. Test behavior, not implementation
-2. Keep tests simple
-3. Use meaningful assertions
-4. Maintain test independence
+- Group related tests
+- Clear test descriptions
+- Proper setup and cleanup
 
-### Code Coverage
+### 2. Testing Principles
 
-- Minimum 80% coverage
-- Critical path coverage
-- Edge case coverage
-- Error handling coverage
+- Test behavior, not implementation
+- Write maintainable tests
+- Handle async operations properly
+- Mock external services
+
+### 3. Coverage Goals
+
+- Components: 80%
+- API Routes: 90%
+- Utility Functions: 100%
+
+### 4. Performance
+
+- Optimize test execution
+- Proper mocking strategies
+- Avoid unnecessary rerenders
+
+## Running Tests
+
+```bash
+# Run all tests
+yarn test
+
+# Run specific test file
+yarn test ComponentName.test.tsx
+
+# Run tests in watch mode
+yarn test --watch
+
+# Generate coverage report
+yarn test --coverage
+```
+
+## Continuous Integration
+
+Tests are run automatically on:
+
+- Pull requests
+- Main branch commits
+- Release tags
+
+For more detailed testing examples and patterns, refer to the test files in the codebase.

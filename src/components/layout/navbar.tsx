@@ -98,13 +98,6 @@ export function Navbar() {
                 Projects
               </Link>
               <Link
-                href="/blog"
-                className="text-foreground/60 hover:text-foreground"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Blog
-              </Link>
-              <Link
                 href="/contact"
                 className="text-foreground/60 hover:text-foreground"
                 onClick={() => setIsMenuOpen(false)}

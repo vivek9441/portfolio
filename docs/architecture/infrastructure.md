@@ -1,194 +1,157 @@
-# Infrastructure Design
+# Infrastructure Architecture
 
-## Network Architecture
+The infrastructure is managed using AWS CDK (Cloud Development Kit) with TypeScript.
 
-### VPC Design
-
-```mermaid
-graph LR
-    subgraph "VPC"
-        subgraph "Public Subnets"
-            ALB[Application Load Balancer]
-        end
-
-        subgraph "Private Subnets"
-            ECS[ECS Services]
-            LAMBDA[Lambda Functions]
-        end
-
-        subgraph "Isolated Subnets"
-            DB[DynamoDB Endpoint]
-        end
-    end
-
-    INTERNET[Internet] --> ALB
-    ALB --> ECS
-    ECS --> DB
-    LAMBDA --> DB
-```
-
-## Infrastructure as Code
-
-### AWS CDK Implementation
-
-- TypeScript-based CDK
-- Reusable constructs
-- Environment separation
-- Best practices
-
-### Stack Organization
+## Stack Organization
 
 ```
 infrastructure/
+├── bin/
+│   └── app.ts               # CDK app entry point
 ├── lib/
-│   ├── constructs/    # Reusable components
-│   └── stacks/        # Main stacks
-├── bin/               # Entry points
-└── test/              # Infrastructure tests
+│   ├── constants.ts         # Shared constants
+│   ├── functions/          # Lambda functions
+│   │   └── contact-form/   # Contact form handler
+│   ├── stacks/            # CDK stack definitions
+│   │   ├── deployment-stack.ts
+│   │   ├── dns-stack.ts
+│   │   ├── email-stack.ts
+│   │   ├── monitoring-stack.ts
+│   │   └── storage-stack.ts
+│   └── types/             # TypeScript types
+└── cdk.json              # CDK configuration
 ```
 
-## Security Architecture
+## Stack Descriptions
+
+### DNS Stack
+
+- Manages Route 53 DNS configuration
+- Handles domain name management
+- Configures DNS records
+
+### Email Stack
+
+- Configures AWS SES for email services
+- Sets up email sending capabilities
+- Manages email templates
+
+### Monitoring Stack
+
+- Implements CloudWatch monitoring
+- Configures alarms and metrics
+- Sets up logging infrastructure
+
+### Storage Stack
+
+- Manages S3 buckets
+- Configures storage policies
+- Handles asset storage
+
+### Deployment Stack
+
+- Manages deployment configuration
+- Handles infrastructure deployment
+- Configures deployment environments
+
+## Infrastructure as Code
+
+All infrastructure is defined as code using AWS CDK TypeScript:
+
+```typescript
+// Example stack structure
+export class EmailStack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
+    super(scope, id, props);
+
+    // SES configuration
+    // Email templates
+    // IAM roles and policies
+  }
+}
+```
+
+## Deployment Process
+
+1. Infrastructure changes are committed to version control
+2. CI/CD pipeline validates changes
+3. CDK diff shows infrastructure changes
+4. Changes are deployed to environments
+
+```bash
+# Deploy all stacks
+cdk deploy --all
+
+# Deploy specific stack
+cdk deploy EmailStack
+```
+
+## Environment Management
+
+- Development environment for testing
+- Production environment for live service
+- Environment-specific configurations
+- Separate AWS accounts per environment
+
+## Security Considerations
+
+### IAM Roles and Policies
+
+- Principle of least privilege
+- Service-specific roles
+- Resource access controls
 
 ### Network Security
 
-- VPC design
+- VPC configuration
 - Security groups
-- NACLs
-- VPC endpoints
+- Network ACLs
 
-### Access Control
+### Resource Protection
 
-- IAM roles
-- Service policies
-- Resource policies
-- Least privilege
+- Backup policies
+- Deletion protection
+- Access logging
 
-### Encryption
+## Monitoring and Alerts
 
-- KMS integration
-- TLS encryption
-- At-rest encryption
-- In-transit encryption
-
-## Monitoring & Logging
-
-### CloudWatch Integration
-
-- Metrics collection
+- CloudWatch metrics
+- Custom alarms
 - Log aggregation
-- Dashboards
-- Alerts
-
-### X-Ray Tracing
-
-- Service maps
-- Trace analysis
 - Performance monitoring
-- Error tracking
 
-## Deployment Strategy
+## Cost Management
 
-### Multi-Environment Support
+- Resource tagging
+- Cost allocation
+- Usage monitoring
+- Optimization strategies
 
-- Development
-- Staging
-- Production
-- Feature environments
+## Best Practices
 
-### CI/CD Pipeline
-
-```mermaid
-graph LR
-    GH[GitHub] --> CB[CodeBuild]
-    CB --> CP[CodePipeline]
-    CP --> DEV[Development]
-    CP --> STAGE[Staging]
-    CP --> PROD[Production]
-```
+1. Use typed constructs
+2. Follow AWS Well-Architected Framework
+3. Implement proper tagging
+4. Maintain documentation
+5. Regular security reviews
+6. Cost optimization reviews
 
 ## Disaster Recovery
 
-### Backup Strategy
+- Backup strategies
+- Recovery procedures
+- Business continuity plans
+- Regular testing
 
-- Automated backups
-- Cross-region replication
-- Point-in-time recovery
-- Retention policies
+## Infrastructure Updates
 
-### High Availability
+When making infrastructure changes:
 
-- Multi-AZ deployment
-- Auto-scaling
-- Load balancing
-- Failover configurations
-
-## Security First Approach
-
-### Zero-Trust Architecture
-
-- No implicit trust
-- Always verify
-- Least privilege access
-- Continuous validation
-
-### Enterprise-Grade Security Features
-
-- Secrets rotation
-- Encryption at rest
-- Fine-grained access control
-- Audit logging
-
-## Global Architecture
-
-```mermaid
-graph TB
-    subgraph "Global Edge Network"
-        CF[CloudFront Distribution]
-        WAF[AWS WAF]
-    end
-
-    subgraph "Frontend Layer"
-        S3[S3 Bucket]
-        CF --> S3
-        WAF --> CF
-    end
-
-    subgraph "Authentication Layer"
-        COGNITO[Cognito User Pools]
-        SECRETS1[Secrets Manager]
-    end
-
-    subgraph "API Layer"
-        APIGW[API Gateway]
-        LAMBDA[Lambda Functions]
-        SECRETS2[Secrets Manager]
-    end
-
-    subgraph "Data Layer"
-        DYNAMODB[DynamoDB Tables]
-        SECRETS3[Secrets Manager]
-    end
-
-    CF --> APIGW
-    APIGW --> LAMBDA
-    LAMBDA --> DYNAMODB
-    LAMBDA --> SECRETS2
-    COGNITO --> SECRETS1
-    LAMBDA --> SECRETS3
-```
-
-## Edge Computing Strategy
-
-### Global Distribution
-
-- CloudFront edge locations
-- Regional deployments
-- Content optimization
-- Dynamic routing
-
-### Performance Optimization
-
-- Edge caching
-- Request collapsing
-- Origin shield
-- Real-time metrics
+1. Create feature branch
+2. Make infrastructure code changes
+3. Run `cdk diff` to review changes
+4. Create pull request
+5. Review and approve changes
+6. Deploy to development
+7. Test thoroughly
+8. Deploy to production

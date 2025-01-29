@@ -1,111 +1,157 @@
 # CI/CD Pipeline Documentation
 
-## Pipeline Overview
+This document outlines the deployment process for bjornmelin-platform-io.
 
-```mermaid
-graph LR
-    GH[GitHub] --> CB[CodeBuild]
-    CB --> CP[CodePipeline]
-    CP --> DEV[Development]
-    CP --> STAGE[Staging]
-    CP --> PROD[Production]
+## Infrastructure Deployment
+
+### Prerequisites
+
+- AWS credentials configured
+- AWS CDK CLI installed
+- Node.js and Yarn
+
+### CDK Deployment Process
+
+1. Navigate to infrastructure directory:
+
+```bash
+cd infrastructure
 ```
 
-## Pipeline Stages
+2. Install dependencies:
 
-### 1. Source Stage
+```bash
+yarn install
+```
 
-- GitHub repository integration
-- Branch protection rules
-- Pull request workflows
-- Code review gates
+3. Build the CDK app:
 
-### 2. Build Stage
+```bash
+yarn build
+```
 
-- **CodeBuild Configuration**
-  - Node.js 20 runtime
-  - pnpm package manager
-  - Custom build containers
-  - Caching strategies
+4. Review infrastructure changes:
 
-### 3. Test Stage
+```bash
+cdk diff
+```
 
-- Unit tests
-- Integration tests
-- E2E tests
-- Security scans
+5. Deploy all stacks:
 
-### 4. Deploy Stage
+```bash
+cdk deploy --all
+```
 
-- Infrastructure deployment
-- Application deployment
-- Configuration updates
-- Health checks
+Or deploy specific stacks:
 
-## Deployment Workflows
+```bash
+cdk deploy EmailStack DnsStack
+```
 
-### Feature Development
+## Next.js Application Deployment
 
-1. Feature branch creation
-2. Development deployment
-3. PR creation
-4. Automated testing
-5. Code review
-6. Staging deployment
-7. Production deployment
+### Production Build
 
-### Hotfix Process
+1. Install dependencies:
 
-1. Hotfix branch creation
-2. Emergency build
-3. Expedited testing
-4. Production deployment
-5. Backport to development
+```bash
+yarn install
+```
 
-## Security Measures
+2. Build the application:
 
-### Pipeline Security
+```bash
+yarn build
+```
 
-- Secrets management
-- IAM roles
-- Audit logging
-- Security scanning
+3. Start production server:
 
-### Deployment Security
+```bash
+yarn start
+```
 
-- Zero-trust model
-- Encryption in transit
-- Access controls
-- Security groups
+### Environment Variables
 
-## Monitoring & Alerts
+Ensure all required environment variables are set:
 
-### Pipeline Monitoring
+- AWS credentials
+- API endpoints
+- Other configuration values
 
-- Build status
-- Deployment health
-- Test coverage
-- Security alerts
+## Deployment Environments
 
-### Deployment Monitoring
+### Development
 
-- Application metrics
-- Infrastructure health
-- Performance data
-- Error tracking
+- Used for testing and development
+- Deployed manually through CDK
+- Separate AWS resources
+
+### Production
+
+- Live environment
+- Deployed through CDK
+- Production-grade resources
+- Enhanced monitoring
+
+## Monitoring
+
+### CloudWatch Metrics
+
+- Application performance
+- Error rates
+- Resource utilization
+
+### Logging
+
+- Application logs
+- Infrastructure logs
+- Access logs
 
 ## Rollback Procedures
 
-### Automated Rollbacks
+If issues are detected:
 
-- Failed deployments
-- Health check failures
-- Error rate thresholds
-- Manual triggers
+1. Identify the problem
+2. Review CloudWatch logs
+3. Revert infrastructure:
 
-### Manual Interventions
+```bash
+cdk deploy --all --previous-version
+```
 
-- Approval gates
-- Emergency stops
-- Manual rollbacks
-- Incident response
+## Security Considerations
+
+- Environment variable management
+- AWS IAM roles and policies
+- Resource access controls
+- Encryption at rest and in transit
+
+## Best Practices
+
+1. Always review `cdk diff` before deployment
+2. Test changes in development first
+3. Monitor deployment logs
+4. Maintain documentation
+5. Regular security updates
+
+## Troubleshooting
+
+Common issues and solutions:
+
+### Permission Issues
+
+- Verify AWS credentials
+- Check IAM roles
+- Review resource policies
+
+### Deployment Failures
+
+- Check CloudWatch logs
+- Verify environment variables
+- Review stack events
+
+### Performance Issues
+
+- Monitor CloudWatch metrics
+- Check resource utilization
+- Review application logs
