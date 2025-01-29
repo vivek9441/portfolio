@@ -1,6 +1,6 @@
 # 🏗️ bjornmelin-platform-io
 
-Cloud-native portfolio platform powering bjornmelin.io. Demonstrates AWS solutions architecture through serverless APIs and infrastructure as code. Built with React 18 RC, Next.js 14, AWS CDK, and modern DevOps practices.
+Cloud-native portfolio platform powering bjornmelin.io. Demonstrates AWS solutions architecture through serverless APIs and infrastructure as code. Built with React 18, Next.js 14, AWS CDK, and modern DevOps practices.
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![AWS SAA](https://img.shields.io/badge/AWS-Solutions%20Architect%20Associate-FF9900?logo=amazon-aws)](https://www.credly.com/org/amazon-web-services/badge/aws-certified-solutions-architect-associate)
@@ -70,6 +70,7 @@ Cloud-native portfolio platform powering bjornmelin.io. Demonstrates AWS solutio
 - [👨‍💻 Author](#-author)
 - [📜 License](#-license)
 - [🌟 Star History](#-star-history)
+- [📚 How to Reference](#-how-to-reference)
 - [🙏 Acknowledgments](#-acknowledgments)
 
 ## 🏛️ Architecture
@@ -80,79 +81,64 @@ Cloud-native portfolio platform powering bjornmelin.io. Demonstrates AWS solutio
 graph TB
     subgraph "Global Edge Network"
         CF[CloudFront Distribution]
-        WAF[AWS WAF]
     end
 
     subgraph "Frontend"
         S3[S3 Bucket]
         CF --> S3
-        WAF --> CF
-    end
-
-    subgraph "Authentication"
-        COGNITO[Cognito User Pools]
-        SECRETS1[Secrets Manager]
     end
 
     subgraph "API Layer"
-        APIGW[API Gateway]
-        LAMBDA[Lambda Functions]
-        SECRETS2[Secrets Manager]
+        LAMBDA[Contact Form Lambda]
+        SES[Amazon SES]
     end
 
-    subgraph "Data Layer"
-        DYNAMODB[DynamoDB Tables]
-        SECRETS3[Secrets Manager]
+    subgraph "DNS & SSL"
+        R53[Route 53]
+        ACM[ACM Certificate]
     end
 
-    CF --> APIGW
-    APIGW --> LAMBDA
-    LAMBDA --> DYNAMODB
-    LAMBDA --> SECRETS2
-    COGNITO --> SECRETS1
-    LAMBDA --> SECRETS3
+    CF --> LAMBDA
+    LAMBDA --> SES
+    R53 --> CF
+    ACM --> CF
 ```
 
-### Network Architecture
-
-```mermaid
-graph LR
-    subgraph "VPC"
-        subgraph "Public Subnets"
-            ALB[Application Load Balancer]
-        end
-
-        subgraph "Private Subnets"
-            ECS[ECS Services]
-            LAMBDA[Lambda Functions]
-        end
-
-        subgraph "Isolated Subnets"
-            DB[DynamoDB Endpoint]
-        end
-    end
-
-    INTERNET[Internet] --> ALB
-    ALB --> ECS
-    ECS --> DB
-    LAMBDA --> DB
-```
-
-### Secrets Access Pattern
+### Contact Form Flow
 
 ```mermaid
 sequenceDiagram
-    participant App as Application
-    participant SM as Secrets Manager
-    participant KMS as KMS
-    participant IAM as IAM
+    participant User
+    participant Frontend
+    participant Lambda
+    participant SES
 
-    App->>IAM: Request Access
-    IAM-->>App: Grant Token
-    App->>SM: GetSecretValue
-    SM->>KMS: Decrypt
-    KMS-->>SM: Decrypted Value
-    SM-->>App: Secret Value
+    User->>Frontend: Submit Contact Form
+    Frontend->>Lambda: POST /api/contact
+    Lambda->>SES: Send Email
+    SES-->>Lambda: Email Sent
+    Lambda-->>Frontend: Success Response
+    Frontend-->>User: Show Success Message
+```
+
+### DNS & CDN Setup
+
+```mermaid
+graph LR
+    subgraph "DNS Management"
+        R53[Route 53]
+        ZONE[Hosted Zone]
+    end
+
+    subgraph "Content Delivery"
+        CF[CloudFront]
+        S3[S3 Origin]
+        ACM[SSL Certificate]
+    end
+
+    R53 --> CF
+    CF --> S3
+    ACM --> CF
 ```
 
 ## 📁 Project Structure
@@ -160,34 +146,47 @@ sequenceDiagram
 ```bash
 bjornmelin-platform-io/
 ├── .github/                # GitHub Actions workflows
-│   └── workflows/
-├── infrastructure/         # CDK infrastructure code
-│   ├── bin/               # CDK app entry point
-│   └── lib/               # CDK stacks and constructs
-├── src/                   # Application source code
-│   ├── app/               # Next.js 15 App Router
-│   │   ├── fonts/         # Local font files
-│   │   └── globals.css    # Global styles
-│   ├── components/        # React components
-│   └── lib/               # Shared utilities
-├── public/                # Static assets
-└── docs/                  # Documentation
+├── docs/                  # Project documentation
+│   ├── api/              # API documentation
+│   ├── architecture/     # Architecture docs
+│   ├── deployment/       # Deployment guides
+│   ├── development/      # Development guides
+│   └── security/         # Security docs
+├── infrastructure/        # CDK infrastructure code
+│   ├── bin/              # CDK app entry
+│   └── lib/              # Infrastructure code
+│       ├── functions/    # Lambda functions
+│       ├── stacks/       # CDK stacks
+│       └── types/        # Stack types
+├── public/               # Static assets
+│   ├── certifications/   # AWS certifications
+│   ├── headshot/        # Profile images
+│   └── projects/        # Project images
+├── src/                  # Application source
+│   ├── app/             # Next.js 14 App Router
+│   │   ├── api/         # API routes
+│   │   └── fonts/       # Custom fonts
+│   ├── components/      # React components
+│   ├── data/           # Static data
+│   ├── hooks/          # Custom hooks
+│   ├── lib/            # Utilities
+│   └── types/          # TypeScript types
 ```
 
 ### Core Components
 
-- **Frontend**: Next.js 15 application with App Router
+- **Frontend**: Next.js 14 application with App Router
 - **Infrastructure**: AWS CDK for cloud resource management
 - **CI/CD**: GitHub Actions for automated deployments
-- **CDN**: CloudFront with global edge locations
-- **Monitoring**: CloudWatch with custom dashboards
+- **CDN**: CloudFront with Route 53 DNS
+- **API**: Serverless Lambda functions with SES integration
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 ```bash
-Node.js >= 20.0.0
+Node.js >= 18.0.0
 yarn >= 4.0.0
 AWS CLI configured
 ```
@@ -206,7 +205,7 @@ yarn install
 aws configure
 
 # Configure environment
-cp .env.example .env.local
+cp .env.production .env.local
 ```
 
 ### Infrastructure Deployment
@@ -214,6 +213,7 @@ cp .env.example .env.local
 ```bash
 # Deploy infrastructure
 cd infrastructure
+yarn install
 yarn cdk deploy
 ```
 
@@ -229,71 +229,73 @@ yarn dev
 ```yaml
 Frontend:
   Core:
-    - React 19 RC
-    - Next.js 15
-    - TypeScript 5.4
+    - React 18
+    - Next.js 14
+    - TypeScript
 
   UI:
     - Tailwind CSS
     - shadcn/ui
     - Framer Motion
+    - GeistVF Font
 
 Infrastructure:
   Core:
     - AWS CDK
     - CloudFront
-    - Lambda Edge
     - S3
+    - Route 53
+    - ACM
+    - Lambda
+    - SES
 
 Development:
   Tools:
-    - yarn
+    - yarn 4.0
     - ESLint
     - Prettier
     - TypeScript
+    - PostCSS
 ```
 
 ## 🏗️ AWS Services Integration
 
 ### Core Services
 
-- **CloudFront**: Global content delivery with edge computing
-- **Route53**: DNS management and routing policies
-- **WAF**: Web application firewall and security rules
-- **ACM**: Certificate management and SSL/TLS
+- **CloudFront**: Global content delivery network
+- **Route53**: DNS management and domain routing
+- **ACM**: SSL/TLS certificate management
+- **S3**: Static website hosting and assets
 
-### Compute Services
+### Compute & Messaging Services
 
-- **Lambda**: Serverless functions with edge capabilities
-- **ECS**: Container orchestration with Fargate
-- **EC2**: Infrastructure hosts (minimal usage)
+- **Lambda**: Serverless contact form handling
+- **SES**: Email delivery for contact form
 
-### Storage Services
+### Development & Deployment
 
-- **S3**: Static assets and website hosting
-- **DynamoDB**: NoSQL database with global tables
-- **EFS**: Container storage when needed
+- **CDK**: Infrastructure as code
+- **GitHub Actions**: CI/CD automation
+- **CloudWatch**: Basic monitoring and logging
 
 ### Security Services
 
-- **Cognito**: User authentication and authorization
-- **Secrets Manager**: Secure secrets storage and rotation
-- **KMS**: Encryption key management
-- **IAM**: Fine-grained access control
-
-### Developer Tools
-
-- **CodeBuild**: CI/CD build processes
-- **CodePipeline**: Deployment automation
-- **CloudWatch**: Monitoring and alerting
-- **X-Ray**: Distributed tracing
+- **IAM**: Role-based access control
+- **WAF**: Basic security rules (optional)
 
 ## 💻 Development Scripts
 
-- `pnpm run deploy:base` - Deploy base infrastructure
-- `pnpm run deploy:frontend` - Deploy frontend application
-- `pnpm run deploy:auth` - Deploy authentication service
-- `pnpm run deploy:api` - Deploy API service
+```bash
+# Development
+yarn dev          # Start development server
+yarn build        # Build production application
+yarn start        # Start production server
+yarn lint         # Run ESLint
+yarn serve        # Serve production build locally
+
+# Infrastructure (in /infrastructure directory)
+yarn cdk deploy   # Deploy AWS infrastructure
+```
 
 ## 👨‍💻 Author
 
@@ -321,6 +323,27 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 [![Star History Chart](https://api.star-history.com/svg?repos=bjornmelin/bjornmelin-platform-io&type=Date)](https://star-history.com/#bjornmelin/bjornmelin-platform-io&Date)
 
+## 📚 How to Reference
+
+If you use this project in your research or work, please cite it as:
+
+```bibtex
+@misc{melin2024portfolio,
+  author = {Melin, Bjorn},
+  title = {bjornmelin-platform-io: Cloud-Native Portfolio Platform},
+  year = {2024},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/bjornmelin/bjornmelin-platform-io}},
+  commit = {main}
+}
+```
+
+Standard Citation:
+```
+Melin, B. (2024). bjornmelin-platform-io: Cloud-Native Portfolio Platform [Computer software]. GitHub. https://github.com/bjornmelin/bjornmelin-platform-io
+```
+
 ## 🙏 Acknowledgments
 
 - AWS Documentation and Best Practices
@@ -331,6 +354,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-Built with React 18 RC + Next.js 14 by [Bjorn Melin](https://bjornmelin.io)
+Built with React 18 + Next.js 14 by [Bjorn Melin](https://bjornmelin.io)
 
 </div>
