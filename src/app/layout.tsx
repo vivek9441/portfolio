@@ -29,6 +29,23 @@ export const metadata: Metadata = {
     icon: '/headshot/headshot-2024.jpg',
     apple: '/headshot/headshot-2024.jpg',
   },
+  openGraph: {
+    type: 'website',
+    title: 'Bjorn Melin - Senior Data Scientist & Cloud Solutions Architect',
+    description: 'Senior Data Scientist and Cloud Solutions Architect specializing in AI/ML, GenAI innovation, cloud architecture, and modern development.',
+    images: [{
+      url: '/screenshots/hero-preview.png',
+      width: 1200,
+      height: 630,
+      alt: 'Bjorn Melin - Portfolio Hero Section'
+    }]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Bjorn Melin - Senior Data Scientist & Cloud Solutions Architect',
+    description: 'Senior Data Scientist and Cloud Solutions Architect specializing in AI/ML, GenAI innovation, cloud architecture, and modern development.',
+    images: ['/screenshots/hero-preview.png']
+  },
   keywords: [
     "Neuro-symbolic AI",
     "Deep Learning",
