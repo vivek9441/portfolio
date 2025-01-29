@@ -1,60 +1,115 @@
 # Deployment Overview
 
-## Deployment Strategy
+## Introduction
 
-Our deployment strategy follows a multi-environment approach with automated CI/CD pipelines and comprehensive monitoring.
+This document provides an overview of deployment processes and practices for bjornmelin-platform-io.
 
-### Key Components
+## Deployment Architecture
 
-```mermaid
-graph TB
-    subgraph "Deployment Pipeline"
-        GH[GitHub Repository]
-        CB[CodeBuild]
-        CP[CodePipeline]
-        ENVS[Environments]
-    end
+### Infrastructure Components
 
-    subgraph "Infrastructure"
-        CDK[AWS CDK]
-        CF[CloudFront]
-        S3[S3]
-        LAMBDA[Lambda]
-    end
+- Next.js application
+- AWS CDK stacks
+- Static assets (S3)
+- Email service (SES)
 
-    GH --> CB
-    CB --> CP
-    CP --> ENVS
-    CDK --> CF
-    CDK --> S3
-    CDK --> LAMBDA
+## Deployment Types
+
+### Production Deployment
+
+Production deployments are managed through AWS CDK and include:
+
+- Infrastructure deployment
+- Application deployment
+- Environment configuration
+- Monitoring setup
+
+### Development Deployment
+
+Development deployments are used for testing and include:
+
+- Local development server
+- Local AWS services
+- Test data
+- Development configurations
+
+## Deployment Process
+
+1. **Build Application**
+
+   - Run tests
+   - Type checking
+   - Build Next.js application
+
+2. **Deploy Infrastructure**
+
+   - Deploy CDK stacks
+   - Configure AWS services
+   - Update DNS settings
+
+3. **Configure Environments**
+
+   - Set environment variables
+   - Configure services
+   - Update API endpoints
+
+4. **Verify Deployment**
+   - Run health checks
+   - Verify endpoints
+   - Check monitoring
+
+## Documentation Sections
+
+- [CI/CD Pipeline](./ci-cd.md)
+- [Environment Configuration](./environments.md)
+- [Monitoring](./monitoring.md)
+
+## Best Practices
+
+### Pre-deployment Checks
+
+- Run all tests
+- Check types
+- Verify dependencies
+- Review changes
+
+### Deployment Safety
+
+- Use staging environments
+- Implement rollback procedures
+- Monitor deployments
+- Verify security settings
+
+### Post-deployment
+
+- Verify application health
+- Check monitoring alerts
+- Validate functionality
+- Review logs
+
+## Quick Reference
+
+### Common Commands
+
+```bash
+# Deploy all stacks
+cdk deploy --all
+
+# Deploy specific stack
+cdk deploy EmailStack
+
+# Verify deployment
+cdk diff
+
+# Roll back deployment
+cdk deploy --all --previous-version
 ```
 
-### Environment Strategy
+### Important Links
 
-- Development (dev)
-- Staging (stage)
-- Production (prod)
-- Feature environments
+- AWS Console
+- Monitoring Dashboard
+- Error Logs
+- Health Checks
 
-### Deployment Process
-
-1. Code commit triggers pipeline
-2. Automated testing
-3. Infrastructure validation
-4. Staged deployments
-5. Production release
-
-### Key Features
-
-- Zero-downtime deployments
-- Automated rollbacks
-- Infrastructure as Code
-- Security checks
-- Performance monitoring
-
-## Documentation Structure
-
-- [Environment Configurations](./environments.md)
-- [CI/CD Pipeline](./ci-cd.md)
-- [Monitoring and Logging](./monitoring.md)
+For detailed information about specific aspects of deployment, please refer to the individual documentation sections listed above.

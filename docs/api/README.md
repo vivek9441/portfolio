@@ -1,66 +1,84 @@
-# API Overview
+# API Documentation
 
-The bjornmelin-platform-io API is built on AWS Lambda with Edge capabilities, using tRPC for end-to-end type safety.
+This section covers the API endpoints available in bjornmelin-platform-io.
 
-## Architecture
+## Available Endpoints
 
-- Edge-optimized API Gateway endpoints
-- Lambda functions with Edge Runtime
-- DynamoDB for data persistence
-- Cognito for authentication
-- End-to-end type safety with tRPC
+Currently, the platform provides the following API endpoint:
 
-## Contents
+- [Contact Form](./contact.md) - Endpoint for handling contact form submissions
 
-- [Authentication](./authentication.md)
-- [Portfolio](./portfolio.md)
-- [Schemas](./schemas.md)
+## API Structure
 
-## Base URL
+The API is implemented using Next.js API routes located in `src/app/api/`:
 
-```plaintext
-Production: https://api.bjornmelin.io/v1
-Staging: https://api.staging.bjornmelin.io/v1
-Development: http://localhost:3000/api/v1
+```
+src/app/api/
+└── contact/
+    └── route.ts    # Contact form handler
 ```
 
-## Rate Limiting
+## Common Patterns
 
-| Environment | Authenticated | Unauthenticated |
-| ----------- | ------------- | --------------- |
-| Production  | 1000/min      | 100/min         |
-| Staging     | 200/min       | 50/min          |
-| Development | Unlimited     | Unlimited       |
+### Request Format
 
-## Error Handling
+All API endpoints accept JSON-formatted request bodies.
 
-All API responses follow a consistent format:
+### Response Format
+
+All API endpoints return JSON responses with the following structure:
 
 ```typescript
+// Success response
 {
-  error?: {
-    code: string;      // Error identifier
-    message: string;   // Human-readable message
-    details?: object;  // Additional context
-  },
-  data?: T;           // Success response data
+  "success": true,
+  "data": any       // Response data if applicable
+}
+
+// Error response
+{
+  "success": false,
+  "error": string   // Error message
 }
 ```
 
-### Common Status Codes
+### Error Handling
 
-- `200`: Success
-- `201`: Resource Created
-- `400`: Bad Request
-- `401`: Unauthorized
-- `403`: Forbidden
-- `404`: Not Found
-- `429`: Rate Limited
-- `500`: Server Error
+- Input validation errors
+- Service availability errors
+- Rate limiting errors
 
-## API Versioning
+## Development
 
-- Current version: `v1`
-- Version in URL path: `/v1/`
-- Older versions supported for 6 months
-- Version sunset notifications via response headers
+### Local Testing
+
+The API can be tested locally using the development server:
+
+```bash
+yarn dev
+```
+
+API endpoints will be available at `http://localhost:3000/api/`
+
+### API Testing Tools
+
+- Thunder Client
+- Postman
+- cURL commands
+
+## Security
+
+- Input validation using Zod
+- Rate limiting
+- CORS configuration
+- Request size limits
+
+## Service Dependencies
+
+The API relies on:
+
+- AWS SES for email sending
+- Environment variables for configuration
+- Type-safe request/response handling
+
+For detailed information about specific endpoints, please refer to their individual documentation pages linked above.

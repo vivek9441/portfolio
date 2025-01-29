@@ -1,151 +1,262 @@
 # Monitoring and Logging
 
-## Monitoring Strategy
+## Overview
 
-### Infrastructure Monitoring
+This document outlines the monitoring and logging setup for bjornmelin-platform-io.
 
-#### CloudWatch Metrics
+## Monitoring Stack
 
-- CPU utilization
-- Memory usage
-- Network traffic
-- API latency
-- Error rates
+Our monitoring is implemented through the AWS CDK monitoring stack:
 
-#### Health Checks
+```typescript
+// infrastructure/lib/stacks/monitoring-stack.ts
+export class MonitoringStack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
+    super(scope, id, props);
+    // Monitoring resources setup
+  }
+}
+```
 
-- Endpoint availability
-- Service health
-- Database connectivity
-- Cache status
+## CloudWatch Metrics
 
-### Application Monitoring
+### Application Metrics
 
-#### Performance Metrics
-
+- Request count
 - Response times
-- Transaction rates
-- Queue lengths
-- Cache hit rates
-
-#### Business Metrics
-
-- User activity
-- Feature usage
 - Error rates
-- Conversion rates
+- API endpoint usage
 
-## Logging Architecture
+### Infrastructure Metrics
 
-### Log Types
-
-#### Application Logs
-
-- Info logs
-- Error logs
-- Debug logs
-- Audit logs
-
-#### Infrastructure Logs
-
-- AWS CloudTrail
-- VPC Flow Logs
-- Load balancer logs
-- WAF logs
-
-### Log Management
-
-#### Collection
-
-- CloudWatch Logs
-- Custom log routers
-- Log aggregation
-- Real-time streaming
-
-#### Storage
-
-- Log retention policies
-- Archival strategy
-- Encryption
-- Access controls
-
-## Alerting System
-
-### Alert Types
-
-#### Critical Alerts
-
-- Service outages
-- Security incidents
-- Data breaches
-- Performance degradation
-
-#### Warning Alerts
-
+- AWS SES email delivery
+- S3 bucket operations
+- CDK stack events
 - Resource utilization
-- Error rate increases
-- Latency spikes
-- Capacity warnings
 
-### Alert Channels
+## Logging
 
-- Email notifications
-- SMS alerts
-- Slack integration
-- PagerDuty
+### Log Groups
 
-## Dashboards
+```typescript
+// Application logs
+const applicationLogs = new logs.LogGroup(this, "ApplicationLogs", {
+  retention: logs.RetentionDays.ONE_WEEK,
+});
 
-### Operational Dashboards
-
-```yaml
-Components:
-  - Service Health
-  - Error Rates
-  - Response Times
-  - Resource Usage
+// Infrastructure logs
+const infrastructureLogs = new logs.LogGroup(this, "InfrastructureLogs", {
+  retention: logs.RetentionDays.ONE_MONTH,
+});
 ```
 
-### Business Dashboards
+### Log Levels
 
-```yaml
-Metrics:
-  - User Activity
-  - Feature Usage
-  - Conversion Rates
-  - Cost Analysis
+```typescript
+// Log levels configuration
+const logLevels = {
+  ERROR: 0,
+  WARN: 1,
+  INFO: 2,
+  DEBUG: 3,
+};
 ```
 
-## Incident Response
+## Alerts
 
-### Process
+### Email Delivery Alerts
 
-1. Alert detection
-2. Initial assessment
-3. Team notification
-4. Investigation
-5. Resolution
-6. Post-mortem
+```typescript
+// SES bounce rate alarm
+new cloudwatch.Alarm(this, "SESBounceRateAlarm", {
+  metric: sesMetrics.bounceRate,
+  threshold: 5,
+  evaluationPeriods: 1,
+  alarmDescription: "Email bounce rate exceeded threshold",
+});
+```
 
-### Documentation
+### Error Rate Alerts
 
-- Incident logs
-- Resolution steps
-- Root cause analysis
-- Prevention measures
+```typescript
+// API error rate alarm
+new cloudwatch.Alarm(this, "APIErrorRateAlarm", {
+  metric: apiMetrics.errorRate,
+  threshold: 1,
+  evaluationPeriods: 5,
+  alarmDescription: "API error rate exceeded threshold",
+});
+```
+
+## Dashboard
+
+### Main Dashboard Components
+
+- API health status
+- Email delivery statistics
+- Error rates graph
+- Resource usage
+
+### Metrics Display
+
+```typescript
+// Dashboard configuration
+new cloudwatch.Dashboard(this, "MainDashboard", {
+  widgets: [
+    // API metrics
+    new cloudwatch.GraphWidget({
+      title: "API Metrics",
+      left: [apiMetrics.requestCount, apiMetrics.errorRate],
+    }),
+    // Email metrics
+    new cloudwatch.GraphWidget({
+      title: "Email Delivery",
+      left: [emailMetrics.deliveryRate, emailMetrics.bounceRate],
+    }),
+  ],
+});
+```
+
+## Error Tracking
+
+### Error Categories
+
+1. API Errors
+
+   - Validation errors
+   - Service errors
+   - Network errors
+
+2. Infrastructure Errors
+   - Deployment failures
+   - Service unavailability
+   - Resource limits
+
+### Error Handling
+
+```typescript
+// Error logging utility
+export function logError(error: Error, context: ErrorContext) {
+  console.error({
+    message: error.message,
+    stack: error.stack,
+    context,
+    timestamp: new Date().toISOString(),
+  });
+}
+```
+
+## Health Checks
+
+### Endpoint Monitoring
+
+```typescript
+// Health check configuration
+new cloudwatch.Alarm(this, "HealthCheckAlarm", {
+  metric: endpointMetrics.availability,
+  threshold: 99,
+  evaluationPeriods: 3,
+  alarmDescription: "Endpoint availability below threshold",
+});
+```
+
+### Resource Health
+
+- S3 bucket availability
+- SES service status
+- API endpoint status
+- CDK stack status
 
 ## Performance Monitoring
 
 ### Key Metrics
 
-- Page load times
-- API response times
-- Database performance
-- Cache efficiency
+- Response times
+- Resource usage
+- Error rates
+- API latency
 
-### Optimization
+### Performance Alerts
 
-- Performance testing
-- Load testing
-- Stress testing
-- Capacity planning
+```typescript
+// Response time alarm
+new cloudwatch.Alarm(this, "ResponseTimeAlarm", {
+  metric: apiMetrics.latency,
+  threshold: 1000, // 1 second
+  evaluationPeriods: 3,
+  alarmDescription: "API response time exceeded threshold",
+});
+```
+
+## Logging Best Practices
+
+1. Structured Logging
+
+```typescript
+logger.info({
+  event: "api_request",
+  path: "/api/contact",
+  duration: 123,
+  status: 200,
+});
+```
+
+2. Error Logging
+
+```typescript
+logger.error({
+  event: "api_error",
+  error: error.message,
+  stack: error.stack,
+  context: requestContext,
+});
+```
+
+3. Audit Logging
+
+```typescript
+logger.info({
+  event: "audit",
+  action: "email_sent",
+  recipient: "user@example.com",
+  timestamp: new Date().toISOString(),
+});
+```
+
+## Monitoring Tools Access
+
+### CloudWatch Access
+
+- Dashboard URL
+- Metrics namespace
+- Log group names
+- Alarm configurations
+
+### Alerts Configuration
+
+- Email notifications
+- Severity levels
+- Escalation procedures
+- On-call rotations
+
+## Troubleshooting Guide
+
+### Common Issues
+
+1. High Error Rates
+
+   - Check API logs
+   - Verify configurations
+   - Review error patterns
+
+2. Performance Issues
+   - Monitor resource usage
+   - Check API latency
+   - Review database metrics
+
+### Resolution Steps
+
+1. Check CloudWatch logs
+2. Review error patterns
+3. Analyze metrics
+4. Update configurations if needed
