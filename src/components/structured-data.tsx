@@ -6,7 +6,7 @@ export function generatePersonSchema() {
     url: "https://bjornmelin.com",
     jobTitle: "Senior Data Scientist & Cloud Solutions Architect",
     description:
-      "Senior Data Scientist and Cloud Solutions Architect specializing in AI/ML, GenAI innovation, and cloud architecture. 6x AWS Certified professional.",
+      "Senior Data Scientist and Cloud Solutions Architect specializing in neuro-symbolic AI, deep learning, and MLOps. AWS Machine Learning Engineer and 6x AWS Certified professional with expertise in cloud architecture, AI engineering, and modern development practices.",
     sameAs: [
       "https://github.com/bjornmelin",
       "https://linkedin.com/in/bjornmelin",
@@ -14,13 +14,25 @@ export function generatePersonSchema() {
       "https://www.coursera.org/learner/bjorn-melin",
     ],
     knowsAbout: [
+      "Neuro-symbolic AI",
+      "Deep Learning",
+      "Reinforcement Learning",
+      "Machine Learning Engineering",
       "AWS Cloud Architecture",
       "Serverless Computing",
+      "MLOps",
+      "Data Science",
       "Full Stack Development",
-      "React",
-      "Next.js",
-      "TypeScript",
-      "Node.js",
+      "Python Development",
+      "TensorFlow & PyTorch",
+      "LangChain & Vector Databases",
+      "CI/CD & Infrastructure as Code",
+      "Kubernetes & Docker",
+      "Next.js & React Development",
+      "Node.js Development",
+      "Statistical Modeling",
+      "Clustering & Dimensionality Reduction",
+      "Innovation & Cloud Computing",
     ],
   };
 }
@@ -32,7 +44,7 @@ export function generateWebsiteSchema() {
     name: "Bjorn Melin - Portfolio",
     url: "https://bjornmelin.com",
     description:
-      "Personal portfolio and blog of Bjorn Melin, AWS Solutions Architect and Full Stack Developer.",
+      "Personal portfolio of Bjorn Melin, Senior Data Scientist and AWS Machine Learning Engineer specializing in neuro-symbolic AI, deep learning, and cloud architecture.",
     author: {
       "@type": "Person",
       name: "Bjorn Melin",
