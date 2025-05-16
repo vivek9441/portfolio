@@ -1,4 +1,4 @@
-# 🏗️ bjornmelin-platform-io
+# 🏗️ Vivek
 
 Cloud-native portfolio platform powering bjornmelin.io. Demonstrates AWS solutions architecture through serverless APIs and infrastructure as code. Built with React 18, Next.js 14, AWS CDK, and modern DevOps practices.
 
